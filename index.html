@@ -513,19 +513,7 @@
   }
   #productPageModal .open-new-tab:hover { text-decoration: underline; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  #security-gate { position:fixed;inset:0;z-index:9999;background:rgba(248,248,248,0.97);display:flex;align-items:center;justify-content:center; }
-  #security-gate .gate-box { background:#fff;border:1px solid #E0E0E0;border-radius:12px;padding:48px 40px;width:340px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.08); }
-  #security-gate .gate-logo { font-family:'Montserrat',sans-serif;font-weight:900;font-size:28px;color:#c80a1e;letter-spacing:-0.5px;margin-bottom:8px; }
-  #security-gate .gate-title { font-size:13px;color:#999;margin-bottom:32px; }
-  #security-gate .gate-label { font-size:12px;color:#666;margin-bottom:10px;text-align:left; }
-  #security-gate .gate-input { width:100%;padding:12px 16px;border:1.5px solid #E0E0E0;border-radius:8px;font-size:20px;letter-spacing:8px;text-align:center;outline:none;margin-bottom:16px;font-family:'Montserrat',sans-serif;transition:border-color .2s; }
-  #security-gate .gate-input:focus { border-color:#c80a1e; }
-  #security-gate .gate-input.error { border-color:#c80a1e;animation:shake .3s; }
-  #security-gate .gate-btn { width:100%;padding:12px;background:#c80a1e;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:background .2s; }
-  #security-gate .gate-btn:hover { background:#a00818; }
-  #security-gate .gate-err { font-size:12px;color:#c80a1e;margin-top:10px;min-height:18px; }
-  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  #security-gate{position:fixed;inset:0;z-index:9999;background:rgba(248,248,248,0.97);display:flex;align-items:center;justify-content:center}#security-gate .gate-box{background:#fff;border:1px solid #E0E0E0;border-radius:12px;padding:48px 40px;width:340px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.08)}#security-gate .gate-logo{font-family:'Montserrat',sans-serif;font-weight:900;font-size:28px;color:#c80a1e;letter-spacing:-0.5px;margin-bottom:8px}#security-gate .gate-title{font-size:13px;color:#999;margin-bottom:32px}#security-gate .gate-label{font-size:12px;color:#666;margin-bottom:10px;text-align:left}#security-gate .gate-input{width:100%;padding:12px 16px;border:1.5px solid #E0E0E0;border-radius:8px;font-size:20px;letter-spacing:8px;text-align:center;outline:none;margin-bottom:16px;font-family:'Montserrat',sans-serif;transition:border-color .2s}#security-gate .gate-input:focus{border-color:#c80a1e}#security-gate .gate-input.error{border-color:#c80a1e;animation:shake .3s}#security-gate .gate-btn{width:100%;padding:12px;background:#c80a1e;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:background .2s}#security-gate .gate-btn:hover{background:#a00818}#security-gate .gate-err{font-size:12px;color:#c80a1e;margin-top:10px;min-height:18px}@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 </style>
 </head>
 <body>
@@ -571,7 +559,7 @@
     <table id="t1" class="table table-sm table-bordered" style="width:100%">
       <thead><tr>
         <th>유형</th><th>코드</th><th>색상</th><th>명칭</th>
-        <th>시리즈</th><th>품목군</th><th>월평균출고량</th><th>기준</th><th>기간</th><th>단종검토</th>
+        <th>시리즈</th><th>품목군</th><th>월평균출고량</th><th>기준</th><th>기간</th><th>단종검토</th><th style="display:none"></th>
       </tr></thead>
       <tbody id="b1"></tbody>
     </table>
@@ -589,7 +577,7 @@
     <table id="t2" class="table table-sm table-bordered" style="width:100%">
       <thead><tr>
         <th>코드</th><th>색상</th><th>명칭</th><th>시리즈</th><th>품목군</th>
-        <th>월평균출고량</th><th>최고색상 기준</th><th>최고출고량</th><th>비율(%)</th><th>기간</th><th>단종검토</th>
+        <th>월평균출고량</th><th>최고색상 기준</th><th>최고출고량</th><th>비율(%)</th><th>기간</th><th>단종검토</th><th style="display:none"></th>
       </tr></thead>
       <tbody id="b2"></tbody>
     </table>
@@ -607,7 +595,7 @@
     <table id="t3" class="table table-sm table-bordered" style="width:100%">
       <thead><tr>
         <th>코드</th><th>색상</th><th>명칭</th><th>시리즈</th><th>품목군</th>
-        <th>월평균출고량</th><th>최고옵션 기준</th><th>최고세트코드</th><th>최고색상</th><th>최고명칭</th><th>최고출고량</th><th>비율(%)</th><th>기간</th><th>단종검토</th>
+        <th>월평균출고량</th><th>최고옵션 기준</th><th>최고세트코드</th><th>최고색상</th><th>최고명칭</th><th>최고출고량</th><th>비율(%)</th><th>기간</th><th>단종검토</th><th style="display:none"></th>
       </tr></thead>
       <tbody id="b3"></tbody>
     </table>
@@ -625,7 +613,7 @@
     <table id="t4" class="table table-sm table-bordered" style="width:100%">
       <thead><tr>
         <th>코드</th><th>색상</th><th>명칭</th><th>시리즈</th><th>품목군</th>
-        <th>월평균출고량</th><th>최고시리즈 기준</th><th>최고세트코드</th><th>최고색상</th><th>최고명칭</th><th>최고출고량</th><th>비율(%)</th><th>기간</th><th>단종검토</th>
+        <th>월평균출고량</th><th>최고시리즈 기준</th><th>최고세트코드</th><th>최고색상</th><th>최고명칭</th><th>최고출고량</th><th>비율(%)</th><th>기간</th><th>단종검토</th><th style="display:none"></th>
       </tr></thead>
       <tbody id="b4"></tbody>
     </table>
@@ -643,7 +631,7 @@
     <table id="t5" class="table table-sm table-bordered" style="width:100%">
       <thead><tr>
         <th>유형</th><th>코드</th><th>색상</th><th>명칭</th><th>시리즈</th><th>품목군</th>
-        <th>월평균출고량</th><th>품목군내순위</th><th>품목군내%</th><th>기간</th><th>기준1~4</th><th>단종검토</th>
+        <th>월평균출고량</th><th>품목군내순위</th><th>품목군내%</th><th>기간</th><th>기준1~4</th><th>단종검토</th><th style="display:none"></th>
       </tr></thead>
       <tbody id="b5"></tbody>
     </table>
@@ -789,7 +777,7 @@ function discKey(r) {
     <td class="text-center"><span class="threshold-val">≤${r.threshold}</span></td>
     <td>${metaCell(r.period)}</td>
     <td class="text-center"><button class="btn-disc-review" onclick="toggleDisc(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','${r.type}',${r.avg},'기준1')">단종검토</button></td>
-    <td>${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
+    <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
   }).join('');
 })();
@@ -811,7 +799,7 @@ function discKey(r) {
     <td class="text-end">${ratioCell(r.ratio_pct)}</td>
     <td>${metaCell(r.period)}</td>
     <td class="text-center"><button class="btn-disc-review" onclick="toggleDisc(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준2')">단종검토</button></td>
-    <td>${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
+    <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
   }).join('');
 })();
@@ -839,7 +827,7 @@ function discKey(r) {
     <td class="text-end">${ratioCell(r.ratio_pct)}</td>
     <td>${metaCell(r.period)}</td>
     <td class="text-center"><button class="btn-disc-review" onclick="toggleDisc(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준3')">단종검토</button></td>
-    <td>${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
+    <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
   }).join('');
 })();
@@ -867,7 +855,7 @@ function discKey(r) {
     <td class="text-end">${ratioCell(r.ratio_pct)}</td>
     <td>${metaCell(r.period)}</td>
     <td class="text-center"><button class="btn-disc-review" onclick="toggleDisc(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준4')">단종검토</button></td>
-    <td>${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
+    <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
   }).join('');
 })();
@@ -890,7 +878,7 @@ function discKey(r) {
     <td>${metaCell(r.period)}</td>
     <td class="text-center">${r.in_crit14 ? '<span class=\"crit-tag\">기준1~4</span>' : ''}</td>
     <td class="text-center"><button class="btn-disc-review" onclick="toggleDisc(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','${r.type}',${r.avg},'품목군하위50%')">단종검토</button></td>
-    <td>${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
+    <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
   }).join('');
 })();
@@ -973,7 +961,7 @@ $(document).ready(function() {
       },
       columnDefs: [
         { targets: -2, orderable: false },
-        { targets: -1, visible: false, searchable: true, orderable: false }
+        { targets: -1, searchable: true, orderable: false }
       ]
     });
   });
@@ -1293,7 +1281,6 @@ function showProductPage(code) {
 
 
 
-
-<script>(function(){ if(sessionStorage.getItem('iloom_gate_auth')==='ok') document.getElementById('security-gate').style.display='none'; })();function checkGate(){var v=document.getElementById('gate-input').value.trim();var inp=document.getElementById('gate-input');var err=document.getElementById('gate-err');if(v==='1230'){sessionStorage.setItem('iloom_gate_auth','ok');document.getElementById('security-gate').style.display='none';}else{err.textContent='접근 코드가 올바르지 않습니다.';inp.classList.add('error');inp.value='';setTimeout(function(){inp.classList.remove('error');},400);}}</script>
+<script>(function(){if(sessionStorage.getItem('iloom_gate_auth')==='ok')document.getElementById('security-gate').style.display='none'})();function checkGate(){var v=document.getElementById('gate-input').value.trim(),inp=document.getElementById('gate-input'),err=document.getElementById('gate-err');if(v==='1230'){sessionStorage.setItem('iloom_gate_auth','ok');document.getElementById('security-gate').style.display='none'}else{err.textContent='접근 코드가 올바르지 않습니다.';inp.classList.add('error');inp.value='';setTimeout(function(){inp.classList.remove('error')},400)}}</script>
 </body>
 </html>
