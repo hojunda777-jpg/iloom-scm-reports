@@ -707,6 +707,7 @@
               <th class="text-center">구성수량</th>
               <th class="text-center">사용구분</th>
               <th class="text-end">가용재고</th>
+              <th class="text-end">월평균출고량</th>
             </tr></thead>
             <tbody id="setCompBody"></tbody>
           </table>
@@ -1024,6 +1025,7 @@ function showSetModal(code, color) {
     empty.style.display = 'none';
     tbody.innerHTML = items.map(it => {
       const cls = it.avail > 0 ? 'avail-pos' : it.avail < 0 ? 'avail-neg' : 'avail-zero';
+      const avgVal = it.avg != null ? it.avg : null;
       return `<tr>
         <td><code>${it.code}</code></td>
         <td>${it.color}</td>
@@ -1031,6 +1033,7 @@ function showSetModal(code, color) {
         <td class="text-center" style="font-family:Montserrat,sans-serif">${it.qty}</td>
         <td class="text-center"><small style="color:#999">${it.usage}</small></td>
         <td class="text-end"><span class="${cls}">${it.avail.toLocaleString()}</span></td>
+        <td class="text-end" style="font-family:Montserrat,sans-serif">${avgVal != null ? avgVal : '<span style="color:#ccc">-</span>'}</td>
       </tr>`;
     }).join('');
   }
