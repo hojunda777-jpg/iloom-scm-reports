@@ -514,7 +514,62 @@
   #productPageModal .open-new-tab:hover { text-decoration: underline; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── 보안 게이트 ── */
+  /* ── 단품→세트 역방향 검색 ── */
+  .btn-unit-search {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; font-size: 12px; font-weight: 500;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #fff; border: 1.5px solid var(--iloom-border);
+    border-radius: 4px; color: #555; cursor: pointer;
+    transition: border-color .15s, color .15s;
+    white-space: nowrap;
+  }
+  .btn-unit-search:hover { border-color: var(--iloom-red); color: var(--iloom-red); }
+
+  #unitSearchModal .modal-content { border-radius: 0; border: 1px solid #E0E0E0; }
+  #unitSearchModal .modal-header {
+    border-bottom: 1px solid #E0E0E0; padding: 12px 16px; background: #fff;
+  }
+  #unitSearchModal .modal-title {
+    font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 600;
+  }
+  #unitSearchModal .unit-search-input-wrap {
+    display: flex; gap: 8px; align-items: center;
+    padding: 16px; border-bottom: 1px solid #E0E0E0; background: #fafafa;
+  }
+  #unitSearchInput {
+    flex: 1; padding: 8px 12px; border: 1.5px solid #E0E0E0; border-radius: 4px;
+    font-size: 13px; font-family: 'Montserrat', sans-serif;
+    outline: none; text-transform: uppercase; letter-spacing: 0.5px;
+    transition: border-color .15s;
+  }
+  #unitSearchInput:focus { border-color: var(--iloom-red); }
+  #unitSearchCount {
+    font-size: 12px; color: #999; white-space: nowrap; min-width: 60px; text-align: right;
+  }
+  #unitSearchResults {
+    max-height: 480px; overflow-y: auto;
+  }
+  #unitSearchResults table {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+  }
+  #unitSearchResults thead th {
+    position: sticky; top: 0; background: #fff;
+    border-bottom: 2px solid var(--iloom-border); padding: 8px 10px;
+    font-weight: 600; color: #555; white-space: nowrap;
+  }
+  #unitSearchResults tbody td {
+    padding: 7px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: middle;
+  }
+  #unitSearchResults tbody tr:hover td { background: #fdf5f6; }
+  #unitSearchResults .no-result {
+    text-align: center; padding: 48px; color: #bbb; font-size: 13px;
+  }
+  .avail-pos { color: #28a745; font-weight: 600; }
+  .avail-neg { color: #c80a1e; font-weight: 600; }
+  .avail-zero { color: #999; }
+
   #security-gate {
     position: fixed; inset: 0; z-index: 9999;
     background: rgba(248,248,248,0.97);
@@ -525,29 +580,16 @@
     padding: 48px 40px; width: 340px; text-align: center;
     box-shadow: 0 8px 32px rgba(0,0,0,0.08);
   }
-  #security-gate .gate-logo {
-    font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 28px;
-    color: #c80a1e; letter-spacing: -0.5px; margin-bottom: 8px;
-  }
-  #security-gate .gate-title { font-size: 13px; color: #999; margin-bottom: 32px; }
-  #security-gate .gate-label { font-size: 12px; color: #666; margin-bottom: 10px; text-align: left; }
-  #security-gate .gate-input {
-    width: 100%; padding: 12px 16px; border: 1.5px solid #E0E0E0; border-radius: 8px;
-    font-size: 20px; letter-spacing: 8px; text-align: center; outline: none; margin-bottom: 16px;
-    font-family: 'Montserrat', sans-serif; transition: border-color .2s;
-  }
-  #security-gate .gate-input:focus { border-color: #c80a1e; }
-  #security-gate .gate-input.error { border-color: #c80a1e; animation: shake .3s; }
-  #security-gate .gate-btn {
-    width: 100%; padding: 12px; background: #c80a1e; color: #fff;
-    border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;
-    font-family: 'Noto Sans KR', sans-serif; transition: background .2s;
-  }
-  #security-gate .gate-btn:hover { background: #a00818; }
-  #security-gate .gate-err { font-size: 12px; color: #c80a1e; margin-top: 10px; min-height: 18px; }
-  @keyframes shake {
-    0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
-  }
+  #security-gate .gate-logo { font-family:'Montserrat',sans-serif; font-weight:900; font-size:28px; color:#c80a1e; letter-spacing:-0.5px; margin-bottom:8px; }
+  #security-gate .gate-title { font-size:13px; color:#999; margin-bottom:32px; }
+  #security-gate .gate-label { font-size:12px; color:#666; margin-bottom:10px; text-align:left; }
+  #security-gate .gate-input { width:100%; padding:12px 16px; border:1.5px solid #E0E0E0; border-radius:8px; font-size:20px; letter-spacing:8px; text-align:center; outline:none; margin-bottom:16px; font-family:'Montserrat',sans-serif; transition:border-color .2s; }
+  #security-gate .gate-input:focus { border-color:#c80a1e; }
+  #security-gate .gate-input.error { border-color:#c80a1e; animation:shake .3s; }
+  #security-gate .gate-btn { width:100%; padding:12px; background:#c80a1e; color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:500; cursor:pointer; font-family:'Noto Sans KR',sans-serif; transition:background .2s; }
+  #security-gate .gate-btn:hover { background:#a00818; }
+  #security-gate .gate-err { font-size:12px; color:#c80a1e; margin-top:10px; min-height:18px; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
 </style>
 </head>
 <body>
@@ -556,9 +598,7 @@
     <div class="gate-logo">iloom</div>
     <div class="gate-title">단종 후보 분석 리포트</div>
     <div class="gate-label">접근 코드를 입력하세요</div>
-    <input id="gate-input" class="gate-input" type="password"
-           maxlength="10" placeholder="••••" autocomplete="off"
-           onkeydown="if(event.key==='Enter')checkGate()">
+    <input id="gate-input" class="gate-input" type="password" maxlength="10" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')checkGate()">
     <button class="gate-btn" onclick="checkGate()">확인</button>
     <div class="gate-err" id="gate-err"></div>
   </div>
@@ -579,6 +619,7 @@
 <!-- 요약 바 -->
 <div class="summary-bar">
   <div class="summary-item"><div class="summary-count">1065</div><div class="summary-label">기준1 출고 미달</div></div><div class="summary-item"><div class="summary-count">218</div><div class="summary-label">기준2 색상 경쟁력</div></div><div class="summary-item"><div class="summary-count">95</div><div class="summary-label">기준3 옵션 경쟁력</div></div><div class="summary-item"><div class="summary-count">30</div><div class="summary-label">기준4 시리즈 경쟁력</div></div><div class="summary-item"><div class="summary-count">883</div><div class="summary-label">품목군 하위 50%</div></div>
+  <button class="btn-unit-search" onclick="openUnitSearch()">🔍 단품 → 세트 검색</button>
 </div>
 
 <!-- 탭 -->
@@ -710,6 +751,27 @@
 </div><!-- tab-content -->
 
 <!-- 구성단품 모달 -->
+
+
+<!-- 단품→세트 역방향 검색 모달 -->
+<div class="modal fade" id="unitSearchModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title">단품코드로 세트 검색</span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="unit-search-input-wrap">
+        <input id="unitSearchInput" type="text" placeholder="단품코드 입력 (예: HSMD0114N)"
+               oninput="runUnitSearch(this.value)" autocomplete="off">
+        <span id="unitSearchCount"></span>
+      </div>
+      <div id="unitSearchResults">
+        <div class="no-result">단품코드를 입력하면 해당 단품이 포함된 세트 목록을 표시합니다</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- 상품 페이지 미리보기 모달 -->
 <div class="modal fade" id="productPageModal" tabindex="-1">
@@ -1316,22 +1378,88 @@ function showProductPage(code) {
 
 
 <script>
-(function(){
-  if(sessionStorage.getItem('iloom_gate_auth')==='ok')
-    document.getElementById('security-gate').style.display='none';
-})();
+// ── 단품→세트 역방향 검색 ─────────────────────────────────────────
+function openUnitSearch() {
+  document.getElementById('unitSearchInput').value = '';
+  document.getElementById('unitSearchCount').textContent = '';
+  document.getElementById('unitSearchResults').innerHTML =
+    '<div class="no-result">단품코드를 입력하면 해당 단품이 포함된 세트 목록을 표시합니다</div>';
+  var m = new bootstrap.Modal(document.getElementById('unitSearchModal'));
+  m.show();
+  document.getElementById('unitSearchModal').addEventListener('shown.bs.modal', function() {
+    document.getElementById('unitSearchInput').focus();
+  }, { once: true });
+}
+
+function runUnitSearch(query) {
+  query = query.trim().toUpperCase();
+  var countEl = document.getElementById('unitSearchCount');
+  var resultEl = document.getElementById('unitSearchResults');
+
+  if (!query) {
+    countEl.textContent = '';
+    resultEl.innerHTML = '<div class="no-result">단품코드를 입력하면 해당 단품이 포함된 세트 목록을 표시합니다</div>';
+    return;
+  }
+
+  // SET_COMPS 역방향 검색
+  var rows = [];
+  Object.keys(SET_COMPS).forEach(function(key) {
+    var parts = key.split('||');
+    var setCode = parts[0], setColor = parts[1] || '';
+    SET_COMPS[key].forEach(function(item) {
+      if (item.code.toUpperCase().indexOf(query) !== -1) {
+        rows.push({ setCode: setCode, setColor: setColor, item: item });
+      }
+    });
+  });
+
+  countEl.textContent = rows.length ? rows.length + '건' : '결과 없음';
+
+  if (rows.length === 0) {
+    resultEl.innerHTML = '<div class="no-result">「' + query + '」 를 구성품으로 포함한 세트가 없습니다</div>';
+    return;
+  }
+
+  var tbody = rows.map(function(r) {
+    var avail = r.item.avail;
+    var cls = avail > 0 ? 'avail-pos' : avail < 0 ? 'avail-neg' : 'avail-zero';
+    var setLink = '<code class="set-code-link" style="cursor:pointer" onclick="bootstrap.Modal.getInstance(document.getElementById('unitSearchModal')).hide();showSetModal('' + r.setCode + '','' + r.setColor + '')">' + r.setCode + '</code>';
+    var imgBtn = '<button class="btn-img-preview" title="상품 이미지" onclick="showProductPage('' + r.setCode + '')" style="margin-left:4px">▶</button>';
+    return '<tr>' +
+      '<td>' + setLink + imgBtn + '</td>' +
+      '<td>' + r.setColor + '</td>' +
+      '<td style="font-size:11px;color:#555">' + (r.item.name || '-') + '</td>' +
+      '<td><code style="font-size:11px;color:var(--iloom-red)">' + r.item.code + '</code></td>' +
+      '<td>' + r.item.color + '</td>' +
+      '<td class="text-center" style="font-family:Montserrat,sans-serif">' + r.item.qty + '</td>' +
+      '<td class="text-end"><span class="' + cls + '">' + avail.toLocaleString() + '</span></td>' +
+      '<td class="text-center"><small style="color:#999">' + r.item.usage + '</small></td>' +
+    '</tr>';
+  }).join('');
+
+  resultEl.innerHTML =
+    '<table>' +
+      '<thead><tr>' +
+        '<th>세트코드</th><th>세트색상</th><th>세트명칭</th>' +
+        '<th>단품코드</th><th>단품색상</th>' +
+        '<th class="text-center">구성수량</th>' +
+        '<th class="text-end">가용재고</th>' +
+        '<th class="text-center">사용구분</th>' +
+      '</tr></thead>' +
+      '<tbody>' + tbody + '</tbody>' +
+    '</table>';
+}
+</script>
+
+
+<script>
+(function(){ if(sessionStorage.getItem('iloom_gate_auth')==='ok') document.getElementById('security-gate').style.display='none'; })();
 function checkGate(){
   var v=document.getElementById('gate-input').value.trim();
-  var inp=document.getElementById('gate-input');
-  var err=document.getElementById('gate-err');
-  if(v==='1230'){
-    sessionStorage.setItem('iloom_gate_auth','ok');
-    document.getElementById('security-gate').style.display='none';
-  } else {
-    err.textContent='접근 코드가 올바르지 않습니다.';
-    inp.classList.add('error'); inp.value='';
-    setTimeout(function(){ inp.classList.remove('error'); },400);
-  }
+  var inp=document.getElementById('gate-input'); var err=document.getElementById('gate-err');
+  if(v==='1230'){ sessionStorage.setItem('iloom_gate_auth','ok'); document.getElementById('security-gate').style.display='none'; }
+  else { err.textContent='접근 코드가 올바르지 않습니다.'; inp.classList.add('error'); inp.value=''; setTimeout(function(){ inp.classList.remove('error'); },400); }
 }
 </script>
 
