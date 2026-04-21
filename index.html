@@ -611,10 +611,12 @@
   }
 
   /* 필터 적용 표시 */
-  table.dataTable thead th.col-filter-active {
+  table.dataTable thead th.col-filter-active,
+  #review-table thead th.col-filter-active {
     background: #fdf5f5 !important; color: var(--iloom-red) !important;
   }
-  table.dataTable thead th.col-filter-active::after {
+  table.dataTable thead th.col-filter-active::after,
+  #review-table thead th.col-filter-active::after {
     content: ' ●'; font-size: 9px; color: var(--iloom-red);
   }
 
@@ -671,7 +673,7 @@
   <span class="brand-logo">iloom</span>
   <div style="width:1px;height:18px;background:var(--iloom-border);"></div>
   <h1 class="page-title">단종 후보 분석 리포트</h1>
-  <span class="page-meta ms-1">기준월 202603 &nbsp;·&nbsp; 생성 2026-04-21 14:48</span>
+  <span class="page-meta ms-1">기준월 202603 &nbsp;·&nbsp; 생성 2026-04-21 15:36</span>
   <div class="ms-auto d-flex gap-2">
     <button class="btn-iloom-secondary" onclick="downloadAllExcel()">전체 엑셀 다운로드</button>
   </div>
@@ -802,19 +804,29 @@
 <!-- 단종검토 탭 -->
 <div class="tab-pane fade" id="tab-review">
   <p class="tab-desc">각 탭에서 "단종검토" 버튼을 눌러 차수(1차 재고소진 / 2차 26.10까지 / 3차 즉시단종) 선택 &nbsp;·&nbsp; 데이터는 브라우저에 자동 저장됩니다</p>
-  <div class="mb-3 d-flex gap-2 align-items-center">
+  <div class="mb-3 d-flex gap-2 align-items-center flex-wrap">
     <button class="btn-iloom-primary" onclick="downloadReviewExcel()">엑셀 다운로드</button>
     <button class="btn-iloom-secondary" onclick="clearAllReview()">전체 삭제</button>
     <span style="font-size:12px;color:var(--iloom-sub);margin-left:8px">선택된 품목: <strong id="review-count-text">0</strong>개 &nbsp;/&nbsp; 현재 필터: <strong id="review-filter-text">전체</strong></span>
+    <span class="filter-hint" style="margin-left:auto"><span class="hint-icon">💡</span> 컬럼 헤더 <b>우클릭</b>으로 필터 검색</span>
+  </div>
+  <div id="review-bulk-bar" style="display:none;margin-bottom:8px;padding:8px 12px;background:#fff3cd;border:1px solid #ffe08a;border-radius:6px;font-size:12px">
+    <strong><span id="review-bulk-count">0</span></strong>개 선택됨 &nbsp;
+    <button type="button" class="btn-iloom-secondary" style="padding:2px 10px;font-size:12px" onclick="bulkSetReviewLevel(this)">일괄 차수 변경</button>
+    <button type="button" class="btn-iloom-secondary" style="padding:2px 10px;font-size:12px" onclick="bulkDeleteReview()">일괄 삭제</button>
+    <button type="button" class="btn-iloom-secondary" style="padding:2px 10px;font-size:12px" onclick="clearReviewChecks()">선택 해제</button>
   </div>
   <div class="group-pills" id="review-level-pills" style="margin-bottom:6px"></div>
   <div class="group-pills" id="review-pills"></div>
   <div class="table-responsive" style="max-height:600px;overflow-y:auto;">
-    <table class="table table-sm table-bordered review-table" style="width:100%">
+    <table class="table table-sm table-bordered review-table" id="review-table" style="width:100%">
       <thead>
         <tr>
-          <th>차수</th><th>출처</th><th>유형</th><th>코드</th><th>색상</th><th>명칭</th>
-          <th>시리즈</th><th>품목군</th><th>월평균출고량</th><th>추가일시</th><th>삭제</th>
+          <th class="ck-col"><input type="checkbox" class="ck-all" data-tid="review" title="필터된 전체 선택/해제"></th>
+          <th data-col="1">차수</th><th data-col="2">출처</th><th data-col="3">유형</th>
+          <th data-col="4">코드</th><th data-col="5">색상</th><th data-col="6">명칭</th>
+          <th data-col="7">시리즈</th><th data-col="8">품목군</th><th data-col="9">월평균출고량</th>
+          <th data-col="10">추가일시</th><th>삭제</th>
         </tr>
       </thead>
       <tbody id="review-tbody"></tbody>
@@ -1138,6 +1150,22 @@ $(document).ready(function() {
     const tid = $(this).data('tid');
     if (!tid) return;
     const checked = this.checked;
+    if (tid === 'review') {
+      const visibleKeys = getReviewVisibleKeys();
+      visibleKeys.forEach(k => {
+        if (checked) _reviewCheckedKeys.add(k); else _reviewCheckedKeys.delete(k);
+      });
+      $('#review-tbody tr[data-review-key]').each(function() {
+        const k = this.getAttribute('data-review-key');
+        const on = _reviewCheckedKeys.has(k);
+        this.classList.toggle('row-checked', on);
+        const ck = this.querySelector('input.ck-review-row');
+        if (ck) ck.checked = on;
+      });
+      syncReviewHeaderCheck();
+      updateReviewBulkBar();
+      return;
+    }
     const api = $(`#${tid}`).DataTable();
     const $rows = $(api.rows({ search: 'applied' }).nodes());
     $rows.find('input.ck-row').prop('checked', checked);
@@ -1148,13 +1176,31 @@ $(document).ready(function() {
   $(document).on('mousedown click', 'th.ck-col', function(e) {
     if (e.target.tagName === 'INPUT') e.stopPropagation();
   });
-  // 행 체크박스 클릭
+  // 행 체크박스 클릭 (DataTables 탭)
   $(document).on('click', 'input.ck-row', function(e) {
     e.stopPropagation();
     const $tr = $(this).closest('tr');
     const tid = $tr.data('tid');
     $tr.toggleClass('row-checked', this.checked);
     if (tid) syncHeaderCheckbox(tid);
+  });
+  // 행 체크박스 클릭 (단종검토 탭)
+  $(document).on('click', 'input.ck-review-row', function(e) {
+    e.stopPropagation();
+    const $tr = $(this).closest('tr');
+    const k = $tr.attr('data-review-key');
+    if (!k) return;
+    if (this.checked) _reviewCheckedKeys.add(k);
+    else _reviewCheckedKeys.delete(k);
+    $tr.toggleClass('row-checked', this.checked);
+    syncReviewHeaderCheck();
+    updateReviewBulkBar();
+  });
+  // 단종검토 탭 헤더 우클릭 → 컬럼 필터
+  $(document).on('contextmenu', '#review-table thead th[data-col]', function(e) {
+    e.preventDefault();
+    const colIdx = Number(this.getAttribute('data-col'));
+    showReviewColFilterPopover(colIdx, this);
   });
   // 품목군 필 초기화
   ['t1','t2','t3','t4','t5'].forEach(id => buildGroupPills(id));
@@ -1187,13 +1233,19 @@ function ensureColFilterPopover() {
   document.addEventListener('keydown', function(e) {
     if (pop.style.display === 'none') return;
     if (e.key === 'Escape') hideColFilterPopover();
-    else if (e.key === 'Enter' && document.activeElement.id === 'cfp-input') applyColFilter();
+    else if (e.key === 'Enter' && document.activeElement.id === 'cfp-input') {
+      if (_activeReviewColFilter != null) applyReviewColFilter();
+      else applyColFilter();
+    }
   });
   return pop;
 }
 function showColFilterPopover(tableId, colIdx, headerEl) {
   const pop = ensureColFilterPopover();
   _activeColFilter = { tableId, colIdx };
+  _activeReviewColFilter = null;
+  pop.querySelector('.cfp-apply').onclick = applyColFilter;
+  pop.querySelector('.cfp-clear').onclick = clearColFilter;
   const title = $(headerEl).clone().children().remove().end().text().trim();
   document.getElementById('cfp-title').textContent = `${title} 필터`;
   const input = document.getElementById('cfp-input');
@@ -1509,6 +1561,25 @@ function restoreDiscState() {
 
 let reviewActiveGroup = '';  // 현재 선택된 품목군 필터
 let reviewActiveLevel = '';  // '', '1', '2', '3', 'none'
+let _reviewCheckedKeys = new Set();
+let _reviewColFilters = {};
+const REVIEW_COL_NAMES = { 1:'차수', 2:'출처', 3:'유형', 4:'코드', 5:'색상', 6:'명칭', 7:'시리즈', 8:'품목군', 9:'월평균출고량', 10:'추가일시' };
+
+function reviewColText(item, colIdx) {
+  switch(colIdx) {
+    case 1: return item.level ? DISC_LEVELS[item.level].desc : '미지정';
+    case 2: return item.src || '';
+    case 3: return item.type || '';
+    case 4: return item.code || '';
+    case 5: return item.color || '';
+    case 6: return item.name || '';
+    case 7: return item.series || '';
+    case 8: return item.group || '';
+    case 9: return String(item.avg == null ? '' : item.avg);
+    case 10: return item.added || '';
+  }
+  return '';
+}
 
 function levelBadgeHTML(level) {
   if (!level) return '<span class="lv-badge none">미지정</span>';
@@ -1526,6 +1597,10 @@ function renderReviewTab() {
   cnt.textContent = list.length;
   if (tabCnt) tabCnt.textContent = list.length;
 
+  // 고아 체크(삭제된 항목) 정리
+  const allKeys = new Set(list.map(x => x.key));
+  _reviewCheckedKeys.forEach(k => { if (!allKeys.has(k)) _reviewCheckedKeys.delete(k); });
+
   // 차수/품목군 pill 렌더링
   buildLevelPills(list);
   buildReviewPills(list);
@@ -1533,14 +1608,20 @@ function renderReviewTab() {
   if (list.length === 0) {
     tbody.innerHTML = '';
     empty.style.display = 'block';
+    updateReviewBulkBar();
     return;
   }
 
-  // 필터 적용 (차수 + 품목군)
+  // 필터 적용 (차수 + 품목군 + 컬럼필터)
   const filtered = list.filter(x => {
     if (reviewActiveGroup && (x.group || '미분류') !== reviewActiveGroup) return false;
     if (reviewActiveLevel === 'none' && x.level) return false;
     if (reviewActiveLevel && reviewActiveLevel !== 'none' && x.level !== reviewActiveLevel) return false;
+    for (const [ci, q] of Object.entries(_reviewColFilters)) {
+      if (!q) continue;
+      const txt = reviewColText(x, Number(ci)).toLowerCase();
+      if (!txt.includes(q.toLowerCase())) return false;
+    }
     return true;
   });
 
@@ -1549,16 +1630,28 @@ function renderReviewTab() {
     const parts = [];
     if (reviewActiveLevel) parts.push(reviewActiveLevel === 'none' ? '미지정' : DISC_LEVELS[reviewActiveLevel].label);
     if (reviewActiveGroup) parts.push(reviewActiveGroup);
+    Object.entries(_reviewColFilters).forEach(([ci,q]) => { if (q) parts.push(`${REVIEW_COL_NAMES[ci]}:${q}`); });
     filterText.textContent = parts.length ? parts.join(' / ') : '전체';
   }
+
+  // 헤더 컬럼필터 활성 표시
+  document.querySelectorAll('#review-table thead th[data-col]').forEach(th => {
+    const ci = th.getAttribute('data-col');
+    th.classList.toggle('col-filter-active', !!_reviewColFilters[ci]);
+  });
 
   if (filtered.length === 0) {
     tbody.innerHTML = '';
     empty.style.display = 'block';
+    syncReviewHeaderCheck();
+    updateReviewBulkBar();
     return;
   }
   empty.style.display = 'none';
-  tbody.innerHTML = filtered.map(item => `<tr>
+  tbody.innerHTML = filtered.map(item => {
+    const checked = _reviewCheckedKeys.has(item.key);
+    return `<tr data-review-key="${escA(item.key)}"${checked ? ' class="row-checked"' : ''}>
+    <td class="ck-col text-center"><input type="checkbox" class="ck-review-row"${checked ? ' checked' : ''}></td>
     <td class="text-center">${levelBadgeHTML(item.level)}</td>
     <td><span style="font-size:11px;color:#666">${item.src}</span></td>
     <td>${typeBadge(item.type)}</td>
@@ -1570,7 +1663,134 @@ function renderReviewTab() {
     <td class="text-end" style="font-family:Montserrat,sans-serif;font-weight:700">${item.avg}</td>
     <td style="font-size:11px;color:#999">${item.added}</td>
     <td class="text-center"><button class="btn-disc-delete" onclick="deleteReviewItem('${escQ(item.key)}')">삭제</button></td>
-  </tr>`).join('');
+  </tr>`;
+  }).join('');
+  syncReviewHeaderCheck();
+  updateReviewBulkBar();
+}
+
+// ── 단종검토 탭: 체크박스 ───────────────────────────────────────────
+function getReviewVisibleKeys() {
+  return Array.from(document.querySelectorAll('#review-tbody tr[data-review-key]'))
+    .map(tr => tr.getAttribute('data-review-key'));
+}
+function syncReviewHeaderCheck() {
+  const $hdr = $('.ck-all[data-tid="review"]');
+  const visible = getReviewVisibleKeys();
+  if (visible.length === 0) { $hdr.prop({ checked:false, indeterminate:false }); return; }
+  const on = visible.filter(k => _reviewCheckedKeys.has(k)).length;
+  if (on === 0)             $hdr.prop({ checked:false, indeterminate:false });
+  else if (on === visible.length) $hdr.prop({ checked:true,  indeterminate:false });
+  else                      $hdr.prop({ checked:false, indeterminate:true  });
+}
+function updateReviewBulkBar() {
+  const bar = document.getElementById('review-bulk-bar');
+  const n = _reviewCheckedKeys.size;
+  if (!bar) return;
+  if (n > 0) {
+    bar.style.display = '';
+    document.getElementById('review-bulk-count').textContent = n;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+function clearReviewChecks() {
+  _reviewCheckedKeys.clear();
+  document.querySelectorAll('#review-tbody tr').forEach(tr => {
+    tr.classList.remove('row-checked');
+    const ck = tr.querySelector('input.ck-review-row');
+    if (ck) ck.checked = false;
+  });
+  syncReviewHeaderCheck();
+  updateReviewBulkBar();
+}
+function bulkDeleteReview() {
+  if (_reviewCheckedKeys.size === 0) return;
+  if (!confirm(`선택된 ${_reviewCheckedKeys.size}개 항목을 삭제하시겠습니까?`)) return;
+  const keys = Array.from(_reviewCheckedKeys);
+  let list = loadDiscList();
+  list = list.filter(x => !_reviewCheckedKeys.has(x.key));
+  saveDiscList(list);
+  keys.forEach(k => updateDiscUI(k, false));
+  _reviewCheckedKeys.clear();
+  renderReviewTab();
+}
+function bulkSetReviewLevel(btn) {
+  if (_reviewCheckedKeys.size === 0) return;
+  hideDiscPopover();
+  _activeDiscBtn = null;
+  _activeDiscData = { _bulkReview: true };
+
+  const pop = document.createElement('div');
+  pop.className = 'disc-level-popover';
+  pop.id = 'discLevelPopover';
+  let html = `<div class="disc-bulk-banner">선택된 ${_reviewCheckedKeys.size}개 항목에 일괄 적용</div>`;
+  ['1','2','3'].forEach(lv => {
+    const def = DISC_LEVELS[lv];
+    html += `<button type="button" class=" lv${lv}" onclick="applyBulkReviewLevel('${lv}')"><span class="lv-tag">${def.label}</span>${def.desc}</button>`;
+  });
+  pop.innerHTML = html;
+  document.body.appendChild(pop);
+  const rect = btn.getBoundingClientRect();
+  pop.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+  pop.style.left = (rect.left + window.scrollX) + 'px';
+  setTimeout(() => {
+    const r = pop.getBoundingClientRect();
+    if (r.right > window.innerWidth - 10) pop.style.left = (window.innerWidth - r.width - 10 + window.scrollX) + 'px';
+    document.addEventListener('mousedown', _discPopOutsideClick);
+    document.addEventListener('keydown', _discPopEsc);
+  }, 30);
+}
+function applyBulkReviewLevel(level) {
+  const keys = Array.from(_reviewCheckedKeys);
+  let list = loadDiscList();
+  keys.forEach(k => {
+    const idx = list.findIndex(x => x.key === k);
+    if (idx >= 0) list[idx].level = level;
+  });
+  saveDiscList(list);
+  keys.forEach(k => updateDiscUI(k, true, level));
+  hideDiscPopover();
+  renderReviewTab();
+}
+
+// ── 단종검토 탭: 컬럼 필터 팝오버 (간단 버전) ──────────────────────
+let _activeReviewColFilter = null;
+function showReviewColFilterPopover(colIdx, headerEl) {
+  const pop = ensureColFilterPopover();
+  _activeReviewColFilter = colIdx;
+  _activeColFilter = null;
+  document.getElementById('cfp-title').textContent = `${REVIEW_COL_NAMES[colIdx] || ''} 필터`;
+  const input = document.getElementById('cfp-input');
+  input.value = _reviewColFilters[colIdx] || '';
+  // 버튼 onclick 재설정
+  pop.querySelector('.cfp-apply').onclick = applyReviewColFilter;
+  pop.querySelector('.cfp-clear').onclick = clearReviewColFilter;
+  const rect = headerEl.getBoundingClientRect();
+  pop.style.display = 'block';
+  pop.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+  pop.style.left = (rect.left + window.scrollX) + 'px';
+  setTimeout(() => {
+    const popRect = pop.getBoundingClientRect();
+    if (popRect.right > window.innerWidth - 10) pop.style.left = (window.innerWidth - popRect.width - 10 + window.scrollX) + 'px';
+    input.focus(); input.select();
+  }, 30);
+}
+function applyReviewColFilter() {
+  if (_activeReviewColFilter == null) return;
+  const v = document.getElementById('cfp-input').value.trim();
+  if (v) _reviewColFilters[_activeReviewColFilter] = v;
+  else delete _reviewColFilters[_activeReviewColFilter];
+  hideColFilterPopover();
+  _activeReviewColFilter = null;
+  renderReviewTab();
+}
+function clearReviewColFilter() {
+  if (_activeReviewColFilter == null) return;
+  delete _reviewColFilters[_activeReviewColFilter];
+  hideColFilterPopover();
+  _activeReviewColFilter = null;
+  renderReviewTab();
 }
 
 function buildLevelPills(list) {
