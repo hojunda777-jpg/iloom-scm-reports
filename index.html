@@ -403,7 +403,65 @@
     color: #fff;
     border-color: var(--iloom-red);
   }
+  /* 차수별 색상 */
+  .btn-disc-review.selected.lv1 { background: #f59e0b; border-color: #f59e0b; }
+  .btn-disc-review.selected.lv2 { background: #ea580c; border-color: #ea580c; }
+  .btn-disc-review.selected.lv3 { background: #c80a1e; border-color: #c80a1e; }
   tr.disc-selected td { background: #fff5f6 !important; }
+
+  /* ── 단종검토 차수 선택 팝오버 ── */
+  .disc-level-popover {
+    position: absolute; z-index: 10000;
+    background: #fff; border: 1px solid #ddd;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    padding: 6px; min-width: 220px;
+    display: flex; flex-direction: column; gap: 4px;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .disc-level-popover button {
+    text-align: left; padding: 8px 12px;
+    border: 1px solid #eee; background: #fafafa;
+    cursor: pointer; font-size: 12px; border-radius: 0;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.15s;
+  }
+  .disc-level-popover button .lv-tag {
+    display: inline-block; min-width: 28px; padding: 1px 6px;
+    font-size: 10px; font-weight: 700; color: #fff;
+    margin-right: 6px; text-align: center;
+  }
+  .disc-level-popover button.lv1 .lv-tag { background: #f59e0b; }
+  .disc-level-popover button.lv2 .lv-tag { background: #ea580c; }
+  .disc-level-popover button.lv3 .lv-tag { background: #c80a1e; }
+  .disc-level-popover button.lv1:hover { border-color: #f59e0b; background: #fff8ed; }
+  .disc-level-popover button.lv2:hover { border-color: #ea580c; background: #fff3ec; }
+  .disc-level-popover button.lv3:hover { border-color: #c80a1e; background: #fdf5f5; }
+  .disc-level-popover button.current { background: #fff3cd; border-color: #ffc107; }
+  .disc-level-popover button.cancel {
+    background: #fff; color: #999;
+    border-top: 1px solid #eee; margin-top: 4px;
+    text-align: center; font-size: 11px;
+  }
+  .disc-level-popover button.cancel:hover { color: var(--iloom-red); border-color: var(--iloom-red); }
+
+  /* 차수 pill (단종검토 탭) */
+  .group-pill.lv-pill.lv1 { background: #fff8ed; color: #b07300; border-color: #f59e0b; }
+  .group-pill.lv-pill.lv1.active { background: #f59e0b; color: #fff; border-color: #f59e0b; }
+  .group-pill.lv-pill.lv2 { background: #fff3ec; color: #b34000; border-color: #ea580c; }
+  .group-pill.lv-pill.lv2.active { background: #ea580c; color: #fff; border-color: #ea580c; }
+  .group-pill.lv-pill.lv3 { background: #fdf5f5; color: #c80a1e; border-color: #c80a1e; }
+  .group-pill.lv-pill.lv3.active { background: #c80a1e; color: #fff; border-color: #c80a1e; }
+
+  /* 차수 셀 (단종검토 탭 테이블) */
+  .lv-badge {
+    display: inline-block; min-width: 32px; padding: 2px 8px;
+    font-size: 10px; font-weight: 700; color: #fff;
+    text-align: center;
+  }
+  .lv-badge.lv1 { background: #f59e0b; }
+  .lv-badge.lv2 { background: #ea580c; }
+  .lv-badge.lv3 { background: #c80a1e; }
+  .lv-badge.none { background: #ccc; color: #fff; }
 
   /* ── 스크롤 DataTables 헤더 스타일 보완 ── */
   .dataTables_scrollHead thead th {
@@ -593,7 +651,7 @@
   <span class="brand-logo">iloom</span>
   <div style="width:1px;height:18px;background:var(--iloom-border);"></div>
   <h1 class="page-title">단종 후보 분석 리포트</h1>
-  <span class="page-meta ms-1">기준월 202603 &nbsp;·&nbsp; 생성 2026-04-21 11:19</span>
+  <span class="page-meta ms-1">기준월 202603 &nbsp;·&nbsp; 생성 2026-04-21 12:22</span>
   <div class="ms-auto d-flex gap-2">
     <button class="btn-iloom-secondary" onclick="downloadAllExcel()">전체 엑셀 다운로드</button>
   </div>
@@ -718,18 +776,19 @@
 
 <!-- 단종검토 탭 -->
 <div class="tab-pane fade" id="tab-review">
-  <p class="tab-desc">각 탭에서 "단종검토" 버튼을 눌러 추가한 품목 목록 &nbsp;·&nbsp; 데이터는 브라우저에 자동 저장됩니다</p>
+  <p class="tab-desc">각 탭에서 "단종검토" 버튼을 눌러 차수(1차 재고소진 / 2차 26.10까지 / 3차 즉시단종) 선택 &nbsp;·&nbsp; 데이터는 브라우저에 자동 저장됩니다</p>
   <div class="mb-3 d-flex gap-2 align-items-center">
     <button class="btn-iloom-primary" onclick="downloadReviewExcel()">엑셀 다운로드</button>
     <button class="btn-iloom-secondary" onclick="clearAllReview()">전체 삭제</button>
     <span style="font-size:12px;color:var(--iloom-sub);margin-left:8px">선택된 품목: <strong id="review-count-text">0</strong>개 &nbsp;/&nbsp; 현재 필터: <strong id="review-filter-text">전체</strong></span>
   </div>
+  <div class="group-pills" id="review-level-pills" style="margin-bottom:6px"></div>
   <div class="group-pills" id="review-pills"></div>
   <div class="table-responsive" style="max-height:600px;overflow-y:auto;">
     <table class="table table-sm table-bordered review-table" style="width:100%">
       <thead>
         <tr>
-          <th>출처</th><th>유형</th><th>코드</th><th>색상</th><th>명칭</th>
+          <th>차수</th><th>출처</th><th>유형</th><th>코드</th><th>색상</th><th>명칭</th>
           <th>시리즈</th><th>품목군</th><th>월평균출고량</th><th>추가일시</th><th>삭제</th>
         </tr>
       </thead>
@@ -843,7 +902,7 @@ function metaCell(v) {
     <td class="text-end">${avgCell(r.avg)}</td>
     <td class="text-center"><span class="threshold-val">≤${r.threshold}</span></td>
     <td>${metaCell(r.period)}</td>
-    <td class="text-center"><button class="btn-disc-review" onclick="toggleDisc(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','${r.type}',${r.avg},'기준1')">단종검토</button></td>
+    <td class="text-center"><button class="btn-disc-review" onclick="showDiscPopover(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','${r.type}',${r.avg},'기준1')">단종검토</button></td>
     <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
   }).join('');
@@ -865,7 +924,7 @@ function metaCell(v) {
     <td class="text-end" style="font-family:Montserrat,sans-serif">${r.best_avg}</td>
     <td class="text-end">${ratioCell(r.ratio_pct)}</td>
     <td>${metaCell(r.period)}</td>
-    <td class="text-center"><button class="btn-disc-review" onclick="toggleDisc(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준2')">단종검토</button></td>
+    <td class="text-center"><button class="btn-disc-review" onclick="showDiscPopover(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준2')">단종검토</button></td>
     <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
   }).join('');
@@ -890,7 +949,7 @@ function metaCell(v) {
     <td class="text-end" style="font-family:Montserrat,sans-serif">${r.best_avg}</td>
     <td class="text-end">${ratioCell(r.ratio_pct)}</td>
     <td>${metaCell(r.period)}</td>
-    <td class="text-center"><button class="btn-disc-review" onclick="toggleDisc(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준3')">단종검토</button></td>
+    <td class="text-center"><button class="btn-disc-review" onclick="showDiscPopover(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준3')">단종검토</button></td>
     <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
   }).join('');
@@ -915,7 +974,7 @@ function metaCell(v) {
     <td class="text-end" style="font-family:Montserrat,sans-serif">${r.best_avg}</td>
     <td class="text-end">${ratioCell(r.ratio_pct)}</td>
     <td>${metaCell(r.period)}</td>
-    <td class="text-center"><button class="btn-disc-review" onclick="toggleDisc(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준4')">단종검토</button></td>
+    <td class="text-center"><button class="btn-disc-review" onclick="showDiscPopover(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준4')">단종검토</button></td>
     <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
   }).join('');
@@ -938,7 +997,7 @@ function metaCell(v) {
     <td class="text-end" style="font-family:Montserrat,sans-serif">${r.pct_rank}%</td>
     <td>${metaCell(r.period)}</td>
     <td class="text-center">${r.in_crit14 ? '<span class=\"crit-tag\">기준1~4</span>' : ''}</td>
-    <td class="text-center"><button class="btn-disc-review" onclick="toggleDisc(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','${r.type}',${r.avg},'하위50%')">단종검토</button></td>
+    <td class="text-center"><button class="btn-disc-review" onclick="showDiscPopover(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','${r.type}',${r.avg},'하위50%')">단종검토</button></td>
     <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
   }).join('');
@@ -1194,6 +1253,11 @@ function discKey(r) {
 
 // ── 단종검토 기능 ──────────────────────────────────────────────────
 const DISC_STORAGE_KEY = 'iloom_disc_review';
+const DISC_LEVELS = {
+  '1': { label: '1차', desc: '재고소진단종' },
+  '2': { label: '2차', desc: '26년 10월까지 운영' },
+  '3': { label: '3차', desc: '즉시단종' }
+};
 
 function loadDiscList() {
   try { return JSON.parse(localStorage.getItem(DISC_STORAGE_KEY) || '[]'); }
@@ -1204,45 +1268,133 @@ function saveDiscList(list) {
   localStorage.setItem(DISC_STORAGE_KEY, JSON.stringify(list));
 }
 
-function toggleDisc(btn, code, color, name, series, group, type, avg, src) {
+// ── 차수 선택 팝오버 ───────────────────────────────────────────────
+let _activeDiscBtn = null;
+let _activeDiscData = null;
+
+function showDiscPopover(btn, code, color, name, series, group, type, avg, src) {
+  hideDiscPopover();
+  _activeDiscBtn = btn;
+  _activeDiscData = { code, color, name, series, group, type, avg, src };
+
   const key = code + '||' + color;
+  const existing = loadDiscList().find(x => x.key === key);
+  const curLevel = existing && existing.level ? existing.level : '';
+
+  const pop = document.createElement('div');
+  pop.className = 'disc-level-popover';
+  pop.id = 'discLevelPopover';
+  let html = '';
+  ['1','2','3'].forEach(lv => {
+    const def = DISC_LEVELS[lv];
+    const cls = lv === curLevel ? ` lv${lv} current` : ` lv${lv}`;
+    html += `<button type="button" class="${cls}" onclick="setDiscLevel('${lv}')"><span class="lv-tag">${def.label}</span>${def.desc}${lv === curLevel ? ' (현재)' : ''}</button>`;
+  });
+  if (existing) {
+    html += `<button type="button" class="cancel" onclick="removeDiscItem()">✕ 단종검토 해제</button>`;
+  }
+  pop.innerHTML = html;
+  document.body.appendChild(pop);
+
+  const rect = btn.getBoundingClientRect();
+  pop.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+  pop.style.left = (rect.left + window.scrollX) + 'px';
+  // 화면 밖이면 안쪽으로
+  setTimeout(() => {
+    const r = pop.getBoundingClientRect();
+    if (r.right > window.innerWidth - 10) {
+      pop.style.left = (window.innerWidth - r.width - 10 + window.scrollX) + 'px';
+    }
+    if (r.bottom > window.innerHeight - 10) {
+      pop.style.top = (rect.top + window.scrollY - r.height - 4) + 'px';
+    }
+    document.addEventListener('mousedown', _discPopOutsideClick);
+    document.addEventListener('keydown', _discPopEsc);
+  }, 30);
+}
+
+function _discPopOutsideClick(e) {
+  const pop = document.getElementById('discLevelPopover');
+  if (!pop) return;
+  if (pop.contains(e.target)) return;
+  if (_activeDiscBtn && _activeDiscBtn.contains(e.target)) return;
+  hideDiscPopover();
+}
+function _discPopEsc(e) { if (e.key === 'Escape') hideDiscPopover(); }
+
+function hideDiscPopover() {
+  const pop = document.getElementById('discLevelPopover');
+  if (pop) pop.remove();
+  document.removeEventListener('mousedown', _discPopOutsideClick);
+  document.removeEventListener('keydown', _discPopEsc);
+  _activeDiscBtn = null;
+  _activeDiscData = null;
+}
+
+function setDiscLevel(level) {
+  if (!_activeDiscData) return;
+  const d = _activeDiscData;
+  const key = d.code + '||' + d.color;
   let list = loadDiscList();
   const idx = list.findIndex(x => x.key === key);
   if (idx >= 0) {
-    // 이미 선택됨 → 해제
-    list.splice(idx, 1);
-    saveDiscList(list);
-    updateDiscUI(key, false);
+    list[idx].level = level;
   } else {
-    // 신규 추가
-    list.push({ key, code, color, name, series, group, type, avg,
-                src, added: new Date().toLocaleString('ko-KR') });
-    saveDiscList(list);
-    updateDiscUI(key, true);
+    list.push({ key, code: d.code, color: d.color, name: d.name, series: d.series,
+                group: d.group, type: d.type, avg: d.avg, src: d.src, level,
+                added: new Date().toLocaleString('ko-KR') });
   }
+  saveDiscList(list);
+  updateDiscUI(key, true, level);
   renderReviewTab();
+  hideDiscPopover();
 }
 
-function updateDiscUI(key, selected) {
-  // 모든 탭의 동일 key 행 업데이트
+function removeDiscItem() {
+  if (!_activeDiscData) return;
+  const d = _activeDiscData;
+  const key = d.code + '||' + d.color;
+  let list = loadDiscList();
+  list = list.filter(x => x.key !== key);
+  saveDiscList(list);
+  updateDiscUI(key, false);
+  renderReviewTab();
+  hideDiscPopover();
+}
+
+function updateDiscUI(key, selected, level) {
   document.querySelectorAll(`tr[data-disc-key="${key}"]`).forEach(tr => {
     const btn = tr.querySelector('.btn-disc-review');
     if (selected) {
       tr.classList.add('disc-selected');
-      if (btn) { btn.classList.add('selected'); btn.textContent = '✓ 검토중'; }
+      if (btn) {
+        btn.classList.add('selected');
+        btn.classList.remove('lv1','lv2','lv3');
+        if (level) btn.classList.add('lv'+level);
+        btn.textContent = level ? '✓ ' + DISC_LEVELS[level].label : '✓ 검토중';
+      }
     } else {
       tr.classList.remove('disc-selected');
-      if (btn) { btn.classList.remove('selected'); btn.textContent = '단종검토'; }
+      if (btn) {
+        btn.classList.remove('selected','lv1','lv2','lv3');
+        btn.textContent = '단종검토';
+      }
     }
   });
 }
 
 function restoreDiscState() {
   const list = loadDiscList();
-  list.forEach(item => updateDiscUI(item.key, true));
+  list.forEach(item => updateDiscUI(item.key, true, item.level));
 }
 
 let reviewActiveGroup = '';  // 현재 선택된 품목군 필터
+let reviewActiveLevel = '';  // '', '1', '2', '3', 'none'
+
+function levelBadgeHTML(level) {
+  if (!level) return '<span class="lv-badge none">미지정</span>';
+  return `<span class="lv-badge lv${level}">${DISC_LEVELS[level].label}</span>`;
+}
 
 function renderReviewTab() {
   const list = loadDiscList();
@@ -1255,7 +1407,8 @@ function renderReviewTab() {
   cnt.textContent = list.length;
   if (tabCnt) tabCnt.textContent = list.length;
 
-  // 품목군 필 렌더링
+  // 차수/품목군 pill 렌더링
+  buildLevelPills(list);
   buildReviewPills(list);
 
   if (list.length === 0) {
@@ -1264,13 +1417,21 @@ function renderReviewTab() {
     return;
   }
 
-  // 현재 필터 적용
-  const filtered = reviewActiveGroup
-    ? list.filter(x => (x.group || '미분류') === reviewActiveGroup)
-    : list;
+  // 필터 적용 (차수 + 품목군)
+  const filtered = list.filter(x => {
+    if (reviewActiveGroup && (x.group || '미분류') !== reviewActiveGroup) return false;
+    if (reviewActiveLevel === 'none' && x.level) return false;
+    if (reviewActiveLevel && reviewActiveLevel !== 'none' && x.level !== reviewActiveLevel) return false;
+    return true;
+  });
 
   const filterText = document.getElementById('review-filter-text');
-  if (filterText) filterText.textContent = reviewActiveGroup || '전체';
+  if (filterText) {
+    const parts = [];
+    if (reviewActiveLevel) parts.push(reviewActiveLevel === 'none' ? '미지정' : DISC_LEVELS[reviewActiveLevel].label);
+    if (reviewActiveGroup) parts.push(reviewActiveGroup);
+    filterText.textContent = parts.length ? parts.join(' / ') : '전체';
+  }
 
   if (filtered.length === 0) {
     tbody.innerHTML = '';
@@ -1279,6 +1440,7 @@ function renderReviewTab() {
   }
   empty.style.display = 'none';
   tbody.innerHTML = filtered.map(item => `<tr>
+    <td class="text-center">${levelBadgeHTML(item.level)}</td>
     <td><span style="font-size:11px;color:#666">${item.src}</span></td>
     <td>${typeBadge(item.type)}</td>
     <td><code>${item.code}</code></td>
@@ -1290,6 +1452,28 @@ function renderReviewTab() {
     <td style="font-size:11px;color:#999">${item.added}</td>
     <td class="text-center"><button class="btn-disc-delete" onclick="deleteReviewItem('${escQ(item.key)}')">삭제</button></td>
   </tr>`).join('');
+}
+
+function buildLevelPills(list) {
+  const pillsEl = document.getElementById('review-level-pills');
+  if (!pillsEl) return;
+  if (list.length === 0) { pillsEl.innerHTML = ''; return; }
+
+  const cnt = { '1': 0, '2': 0, '3': 0, 'none': 0 };
+  list.forEach(x => { const k = x.level || 'none'; cnt[k] = (cnt[k] || 0) + 1; });
+
+  let html = `<span class="group-pill${reviewActiveLevel === '' ? ' active' : ''}" onclick="filterReviewLevel(this,'')">전체 <span class="pill-cnt">${list.length}</span></span>`;
+  ['1','2','3'].forEach(lv => {
+    if (!cnt[lv]) return;
+    const active = reviewActiveLevel === lv ? ' active' : '';
+    const def = DISC_LEVELS[lv];
+    html += `<span class="group-pill lv-pill lv${lv}${active}" onclick="filterReviewLevel(this,'${lv}')">${def.label} (${def.desc}) <span class="pill-cnt">${cnt[lv]}</span></span>`;
+  });
+  if (cnt['none']) {
+    const active = reviewActiveLevel === 'none' ? ' active' : '';
+    html += `<span class="group-pill${active}" onclick="filterReviewLevel(this,'none')">미지정 <span class="pill-cnt">${cnt['none']}</span></span>`;
+  }
+  pillsEl.innerHTML = html;
 }
 
 function buildReviewPills(list) {
@@ -1312,6 +1496,10 @@ function filterReviewGroup(el, groupName) {
   reviewActiveGroup = groupName;
   renderReviewTab();
 }
+function filterReviewLevel(el, level) {
+  reviewActiveLevel = level;
+  renderReviewTab();
+}
 
 function deleteReviewItem(key) {
   let list = loadDiscList();
@@ -1327,14 +1515,17 @@ function clearAllReview() {
   list.forEach(item => updateDiscUI(item.key, false));
   saveDiscList([]);
   reviewActiveGroup = '';
+  reviewActiveLevel = '';
   renderReviewTab();
 }
 
 function downloadReviewExcel() {
   const list = loadDiscList();
   if (list.length === 0) { alert('단종검토 품목이 없습니다.'); return; }
-  const headers = ['출처','유형','코드','색상','명칭','시리즈','품목군','월평균출고량','추가일시'];
-  const toRow = x => [x.src, x.type, x.code, x.color, x.name, x.series, x.group, x.avg, x.added];
+  const headers = ['차수','차수설명','출처','유형','코드','색상','명칭','시리즈','품목군','월평균출고량','추가일시'];
+  const lvLabel = x => x.level ? DISC_LEVELS[x.level].label : '미지정';
+  const lvDesc  = x => x.level ? DISC_LEVELS[x.level].desc  : '';
+  const toRow = x => [lvLabel(x), lvDesc(x), x.src, x.type, x.code, x.color, x.name, x.series, x.group, x.avg, x.added];
 
   const wb = XLSX.utils.book_new();
 
@@ -1343,7 +1534,23 @@ function downloadReviewExcel() {
     XLSX.utils.aoa_to_sheet([headers, ...list.map(toRow)]),
     '전체');
 
-  // 2. 품목군별 시트
+  // 2. 차수별 시트
+  ['1','2','3'].forEach(lv => {
+    const rows = list.filter(x => x.level === lv);
+    if (rows.length === 0) return;
+    const def = DISC_LEVELS[lv];
+    XLSX.utils.book_append_sheet(wb,
+      XLSX.utils.aoa_to_sheet([headers, ...rows.map(toRow)]),
+      `${def.label}_${def.desc}`.substring(0, 31));
+  });
+  const noneRows = list.filter(x => !x.level);
+  if (noneRows.length > 0) {
+    XLSX.utils.book_append_sheet(wb,
+      XLSX.utils.aoa_to_sheet([headers, ...noneRows.map(toRow)]),
+      '미지정');
+  }
+
+  // 3. 품목군별 시트
   const groups = {};
   list.forEach(x => {
     const g = x.group || '미분류';
