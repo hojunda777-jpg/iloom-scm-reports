@@ -562,6 +562,17 @@
 
   /* 상단 전체 검색창 숨김 (우클릭 컬럼 필터 사용) */
   .dataTables_wrapper .dataTables_filter { display: none !important; }
+
+  /* 컬럼 우클릭 안내 문구 */
+  .filter-hint {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; color: #888;
+    background: #fdf5f5; border: 1px solid #f3d5d8;
+    padding: 4px 10px; border-radius: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .filter-hint b { color: var(--iloom-red); font-weight: 600; }
+  .filter-hint .hint-icon { font-size: 11px; }
 </style>
 </head>
 <body>
@@ -582,7 +593,7 @@
   <span class="brand-logo">iloom</span>
   <div style="width:1px;height:18px;background:var(--iloom-border);"></div>
   <h1 class="page-title">단종 후보 분석 리포트</h1>
-  <span class="page-meta ms-1">기준월 202603 &nbsp;·&nbsp; 생성 2026-04-21 10:55</span>
+  <span class="page-meta ms-1">기준월 202603 &nbsp;·&nbsp; 생성 2026-04-21 11:19</span>
   <div class="ms-auto d-flex gap-2">
     <button class="btn-iloom-secondary" onclick="downloadAllExcel()">전체 엑셀 다운로드</button>
   </div>
@@ -608,8 +619,9 @@
 <!-- 기준1 -->
 <div class="tab-pane fade show active" id="tab1">
   <p class="tab-desc">세트 월평균 ≤ 5개 또는 단품 월평균 ≤ 10개 &nbsp;·&nbsp; 신규품목은 첫출고 다음달~전월 기준</p>
-  <div class="mb-3">
+  <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
     <button class="btn-iloom-secondary" onclick="downloadExcel('t1','기준1_출고미달')">엑셀 다운로드</button>
+    <span class="filter-hint"><span class="hint-icon">💡</span> 컬럼 헤더 <b>우클릭</b>으로 컬럼별 필터 검색</span>
   </div>
   <div class="group-pills" id="pills1"></div>
   <div class="table-responsive">
@@ -627,8 +639,9 @@
 <!-- 기준2 -->
 <div class="tab-pane fade" id="tab2">
   <p class="tab-desc">같은 세트코드(동일 제품) 내 색상 간 비교 &nbsp;·&nbsp; 최고 색상 대비 25% 이하</p>
-  <div class="mb-3">
+  <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
     <button class="btn-iloom-secondary" onclick="downloadExcel('t2','기준2_색상경쟁력')">엑셀 다운로드</button>
+    <span class="filter-hint"><span class="hint-icon">💡</span> 컬럼 헤더 <b>우클릭</b>으로 컬럼별 필터 검색</span>
   </div>
   <div class="group-pills" id="pills2"></div>
   <div class="table-responsive">
@@ -646,8 +659,9 @@
 <!-- 기준3 -->
 <div class="tab-pane fade" id="tab3">
   <p class="tab-desc">같은 시리즈+기본세트명+색상 내 옵션 간 비교 &nbsp;·&nbsp; 최고 옵션 대비 25% 이하</p>
-  <div class="mb-3">
+  <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
     <button class="btn-iloom-secondary" onclick="downloadExcel('t3','기준3_옵션경쟁력')">엑셀 다운로드</button>
+    <span class="filter-hint"><span class="hint-icon">💡</span> 컬럼 헤더 <b>우클릭</b>으로 컬럼별 필터 검색</span>
   </div>
   <div class="group-pills" id="pills3"></div>
   <div class="table-responsive">
@@ -665,8 +679,9 @@
 <!-- 기준4 -->
 <div class="tab-pane fade" id="tab4">
   <p class="tab-desc">같은 품목군+역할+색상+옵션 내 시리즈 간 비교 &nbsp;·&nbsp; 최고 시리즈 대비 25% 이하</p>
-  <div class="mb-3">
+  <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
     <button class="btn-iloom-secondary" onclick="downloadExcel('t4','기준4_시리즈경쟁력')">엑셀 다운로드</button>
+    <span class="filter-hint"><span class="hint-icon">💡</span> 컬럼 헤더 <b>우클릭</b>으로 컬럼별 필터 검색</span>
   </div>
   <div class="group-pills" id="pills4"></div>
   <div class="table-responsive">
@@ -684,8 +699,9 @@
 <!-- 하위50% -->
 <div class="tab-pane fade" id="tab5">
   <p class="tab-desc">품목군 내 출고량 하위 50% &nbsp;·&nbsp; <span class="crit-tag">기준1~4</span> 는 기준1~4에 이미 포함된 항목</p>
-  <div class="mb-3">
+  <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
     <button class="btn-iloom-secondary" onclick="downloadExcel('t5','품목군하위50%')">엑셀 다운로드</button>
+    <span class="filter-hint"><span class="hint-icon">💡</span> 컬럼 헤더 <b>우클릭</b>으로 컬럼별 필터 검색</span>
   </div>
   <div class="group-pills" id="pills5"></div>
   <div class="table-responsive">
