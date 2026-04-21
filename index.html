@@ -631,6 +631,26 @@
   }
   .filter-hint b { color: var(--iloom-red); font-weight: 600; }
   .filter-hint .hint-icon { font-size: 11px; }
+
+  /* ── 체크박스 컬럼 ── */
+  table.dataTable th.ck-col, table.dataTable td.ck-col {
+    width: 32px; text-align: center; padding: 4px !important;
+  }
+  table.dataTable th.ck-col { cursor: default; }
+  table.dataTable th.ck-col:hover::before { content: none !important; }
+  .ck-row, .ck-all {
+    width: 16px; height: 16px; cursor: pointer;
+    accent-color: var(--iloom-red); margin: 0; vertical-align: middle;
+  }
+  tr.row-checked td { background: #fff3cd !important; }
+  tr.row-checked.disc-selected td { background: #ffe2c0 !important; }
+
+  /* 일괄 적용 안내 (팝오버 상단) */
+  .disc-bulk-banner {
+    font-size: 11px; color: #fff; background: var(--iloom-red);
+    padding: 6px 10px; margin: -6px -6px 6px;
+    text-align: center; font-weight: 500;
+  }
 </style>
 </head>
 <body>
@@ -651,7 +671,7 @@
   <span class="brand-logo">iloom</span>
   <div style="width:1px;height:18px;background:var(--iloom-border);"></div>
   <h1 class="page-title">단종 후보 분석 리포트</h1>
-  <span class="page-meta ms-1">기준월 202603 &nbsp;·&nbsp; 생성 2026-04-21 12:22</span>
+  <span class="page-meta ms-1">기준월 202603 &nbsp;·&nbsp; 생성 2026-04-21 14:48</span>
   <div class="ms-auto d-flex gap-2">
     <button class="btn-iloom-secondary" onclick="downloadAllExcel()">전체 엑셀 다운로드</button>
   </div>
@@ -687,6 +707,7 @@
       <thead><tr>
         <th>유형</th><th>코드</th><th>색상</th><th>명칭</th>
         <th>시리즈</th><th>품목군</th><th>월평균출고량</th><th>기준</th><th>기간</th>
+        <th class="ck-col"><input type="checkbox" class="ck-all" data-tid="t1" title="필터된 전체 선택/해제"></th>
         <th>단종검토</th><th style="display:none"></th>
       </tr></thead>
       <tbody id="b1"></tbody>
@@ -707,6 +728,7 @@
       <thead><tr>
         <th>코드</th><th>색상</th><th>명칭</th><th>시리즈</th><th>품목군</th>
         <th>월평균출고량</th><th>최고색상 기준</th><th>최고출고량</th><th>비율(%)</th><th>기간</th>
+        <th class="ck-col"><input type="checkbox" class="ck-all" data-tid="t2" title="필터된 전체 선택/해제"></th>
         <th>단종검토</th><th style="display:none"></th>
       </tr></thead>
       <tbody id="b2"></tbody>
@@ -727,6 +749,7 @@
       <thead><tr>
         <th>코드</th><th>색상</th><th>명칭</th><th>시리즈</th><th>품목군</th>
         <th>월평균출고량</th><th>최고옵션 기준</th><th>최고세트코드</th><th>최고색상</th><th>최고명칭</th><th>최고출고량</th><th>비율(%)</th><th>기간</th>
+        <th class="ck-col"><input type="checkbox" class="ck-all" data-tid="t3" title="필터된 전체 선택/해제"></th>
         <th>단종검토</th><th style="display:none"></th>
       </tr></thead>
       <tbody id="b3"></tbody>
@@ -747,6 +770,7 @@
       <thead><tr>
         <th>코드</th><th>색상</th><th>명칭</th><th>시리즈</th><th>품목군</th>
         <th>월평균출고량</th><th>최고시리즈 기준</th><th>최고세트코드</th><th>최고색상</th><th>최고명칭</th><th>최고출고량</th><th>비율(%)</th><th>기간</th>
+        <th class="ck-col"><input type="checkbox" class="ck-all" data-tid="t4" title="필터된 전체 선택/해제"></th>
         <th>단종검토</th><th style="display:none"></th>
       </tr></thead>
       <tbody id="b4"></tbody>
@@ -767,6 +791,7 @@
       <thead><tr>
         <th>유형</th><th>코드</th><th>색상</th><th>명칭</th><th>시리즈</th><th>품목군</th>
         <th>월평균출고량</th><th>품목군내순위</th><th>품목군내%</th><th>기간</th><th>기준1~4</th>
+        <th class="ck-col"><input type="checkbox" class="ck-all" data-tid="t5" title="필터된 전체 선택/해제"></th>
         <th>단종검토</th><th style="display:none"></th>
       </tr></thead>
       <tbody id="b5"></tbody>
@@ -892,7 +917,7 @@ function metaCell(v) {
   const tbody = document.getElementById('b1');
   tbody.innerHTML = DATA.c1.map(r => {
     const key = discKey(r);
-    return `<tr data-disc-key="${key}">
+    return `<tr data-disc-key="${key}" data-tid="t1" data-code="${escA(r.code)}" data-color="${escA(r.color)}" data-name="${escA(r.name)}" data-series="${escA(r.series)}" data-group="${escA(r.group)}" data-type="${r.type}" data-avg="${r.avg}" data-src="기준1">
     <td>${typeBadge(r.type)}</td>
     <td>${r.type==='SET' ? `<code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}')">${r.code}</code>` : `<code>${r.code}</code>`}</td>
     <td>${r.color}</td>
@@ -902,6 +927,7 @@ function metaCell(v) {
     <td class="text-end">${avgCell(r.avg)}</td>
     <td class="text-center"><span class="threshold-val">≤${r.threshold}</span></td>
     <td>${metaCell(r.period)}</td>
+    <td class="ck-col text-center"><input type="checkbox" class="ck-row"></td>
     <td class="text-center"><button class="btn-disc-review" onclick="showDiscPopover(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','${r.type}',${r.avg},'기준1')">단종검토</button></td>
     <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
@@ -913,7 +939,7 @@ function metaCell(v) {
   const tbody = document.getElementById('b2');
   tbody.innerHTML = DATA.c2.map(r => {
     const key = discKey(r);
-    return `<tr data-disc-key="${key}">
+    return `<tr data-disc-key="${key}" data-tid="t2" data-code="${escA(r.code)}" data-color="${escA(r.color)}" data-name="${escA(r.name)}" data-series="${escA(r.series)}" data-group="${escA(r.group)}" data-type="SET" data-avg="${r.avg}" data-src="기준2">
     <td><code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}')">${r.code}</code></td>
     <td>${r.color}</td>
     <td>${r.name}</td>
@@ -924,6 +950,7 @@ function metaCell(v) {
     <td class="text-end" style="font-family:Montserrat,sans-serif">${r.best_avg}</td>
     <td class="text-end">${ratioCell(r.ratio_pct)}</td>
     <td>${metaCell(r.period)}</td>
+    <td class="ck-col text-center"><input type="checkbox" class="ck-row"></td>
     <td class="text-center"><button class="btn-disc-review" onclick="showDiscPopover(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준2')">단종검토</button></td>
     <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
@@ -935,7 +962,7 @@ function metaCell(v) {
   const tbody = document.getElementById('b3');
   tbody.innerHTML = DATA.c3.map(r => {
     const key = discKey(r);
-    return `<tr data-disc-key="${key}">
+    return `<tr data-disc-key="${key}" data-tid="t3" data-code="${escA(r.code)}" data-color="${escA(r.color)}" data-name="${escA(r.name)}" data-series="${escA(r.series)}" data-group="${escA(r.group)}" data-type="SET" data-avg="${r.avg}" data-src="기준3">
     <td><code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}')">${r.code}</code></td>
     <td>${r.color}</td>
     <td>${r.name}</td>
@@ -949,6 +976,7 @@ function metaCell(v) {
     <td class="text-end" style="font-family:Montserrat,sans-serif">${r.best_avg}</td>
     <td class="text-end">${ratioCell(r.ratio_pct)}</td>
     <td>${metaCell(r.period)}</td>
+    <td class="ck-col text-center"><input type="checkbox" class="ck-row"></td>
     <td class="text-center"><button class="btn-disc-review" onclick="showDiscPopover(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준3')">단종검토</button></td>
     <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
@@ -960,7 +988,7 @@ function metaCell(v) {
   const tbody = document.getElementById('b4');
   tbody.innerHTML = DATA.c4.map(r => {
     const key = discKey(r);
-    return `<tr data-disc-key="${key}">
+    return `<tr data-disc-key="${key}" data-tid="t4" data-code="${escA(r.code)}" data-color="${escA(r.color)}" data-name="${escA(r.name)}" data-series="${escA(r.series)}" data-group="${escA(r.group)}" data-type="SET" data-avg="${r.avg}" data-src="기준4">
     <td><code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}')">${r.code}</code></td>
     <td>${r.color}</td>
     <td>${r.name}</td>
@@ -974,6 +1002,7 @@ function metaCell(v) {
     <td class="text-end" style="font-family:Montserrat,sans-serif">${r.best_avg}</td>
     <td class="text-end">${ratioCell(r.ratio_pct)}</td>
     <td>${metaCell(r.period)}</td>
+    <td class="ck-col text-center"><input type="checkbox" class="ck-row"></td>
     <td class="text-center"><button class="btn-disc-review" onclick="showDiscPopover(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','SET',${r.avg},'기준4')">단종검토</button></td>
     <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
@@ -985,7 +1014,7 @@ function metaCell(v) {
   const tbody = document.getElementById('b5');
   tbody.innerHTML = DATA.b50.map(r => {
     const key = discKey(r);
-    return `<tr data-disc-key="${key}">
+    return `<tr data-disc-key="${key}" data-tid="t5" data-code="${escA(r.code)}" data-color="${escA(r.color)}" data-name="${escA(r.name)}" data-series="${escA(r.series)}" data-group="${escA(r.group)}" data-type="${r.type}" data-avg="${r.avg}" data-src="하위50%">
     <td>${typeBadge(r.type)}</td>
     <td>${r.type==='SET' ? `<code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}')">${r.code}</code>` : `<code>${r.code}</code>`}</td>
     <td>${r.color}</td>
@@ -997,6 +1026,7 @@ function metaCell(v) {
     <td class="text-end" style="font-family:Montserrat,sans-serif">${r.pct_rank}%</td>
     <td>${metaCell(r.period)}</td>
     <td class="text-center">${r.in_crit14 ? '<span class=\"crit-tag\">기준1~4</span>' : ''}</td>
+    <td class="ck-col text-center"><input type="checkbox" class="ck-row"></td>
     <td class="text-center"><button class="btn-disc-review" onclick="showDiscPopover(this,'${escQ(r.code)}','${escQ(r.color)}','${escQ(r.name)}','${escQ(r.series)}','${escQ(r.group)}','${r.type}',${r.avg},'하위50%')">단종검토</button></td>
     <td style="display:none">${(SET_COMPS[r.code+'||'+r.color]||[]).map(i=>i.code).join(' ')}</td>
   </tr>`;
@@ -1066,7 +1096,7 @@ function filterGroup(el, tableId, groupName) {
 // DataTables 초기화
 $(document).ready(function() {
   ['t1','t2','t3','t4','t5'].forEach(id => {
-    $(`#${id}`).DataTable({
+    const dt = $(`#${id}`).DataTable({
       paging: false,
       scrollY: '550px',
       scrollX: true,
@@ -1077,10 +1107,12 @@ $(document).ready(function() {
         emptyTable: '데이터가 없습니다'
       },
       columnDefs: [
+        { targets: -3, orderable: false, searchable: false },
         { targets: -2, orderable: false },
         { targets: -1, searchable: true, orderable: false, visible: false }
       ]
     });
+    dt.on('draw', () => syncHeaderCheckbox(id));
   });
 
   // 헤더 우클릭 → 컬럼 필터 팝오버
@@ -1094,9 +1126,35 @@ $(document).ready(function() {
     const api = $(`#${tableId}`).DataTable();
     const colDef = api.settings()[0].aoColumns[colIdx];
     if (!colDef.bVisible || !colDef.bSearchable) return;
-    if (colIdx === api.columns().count() - 2) return; // 단종검토 버튼
+    const total = api.columns().count();
+    if (colIdx === total - 2 || colIdx === total - 3) return; // 단종검토/체크박스
     e.preventDefault();
     showColFilterPopover(tableId, colIdx, this);
+  });
+
+  // ── 체크박스: 헤더 클릭 → 필터된 행 일괄 토글 ─────────────────────
+  $(document).on('click', '.ck-all', function(e) {
+    e.stopPropagation();
+    const tid = $(this).data('tid');
+    if (!tid) return;
+    const checked = this.checked;
+    const api = $(`#${tid}`).DataTable();
+    const $rows = $(api.rows({ search: 'applied' }).nodes());
+    $rows.find('input.ck-row').prop('checked', checked);
+    $rows.toggleClass('row-checked', checked);
+    syncHeaderCheckbox(tid);
+  });
+  // 체크박스 헤더 클릭 시 정렬 트리거 방지
+  $(document).on('mousedown click', 'th.ck-col', function(e) {
+    if (e.target.tagName === 'INPUT') e.stopPropagation();
+  });
+  // 행 체크박스 클릭
+  $(document).on('click', 'input.ck-row', function(e) {
+    e.stopPropagation();
+    const $tr = $(this).closest('tr');
+    const tid = $tr.data('tid');
+    $tr.toggleClass('row-checked', this.checked);
+    if (tid) syncHeaderCheckbox(tid);
   });
   // 품목군 필 초기화
   ['t1','t2','t3','t4','t5'].forEach(id => buildGroupPills(id));
@@ -1247,8 +1305,41 @@ function showSetModal(code, color) {
 function escQ(s) {
   return String(s || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 }
+function escA(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 function discKey(r) {
   return (r.code || '') + '||' + (r.color || '');
+}
+
+// ── 체크박스 헤더 상태 동기화 (필터된 행 기준) ───────────────────────
+function syncHeaderCheckbox(tid) {
+  if (!$.fn.dataTable.isDataTable('#'+tid)) return;
+  const api = $('#'+tid).DataTable();
+  const $rows = $(api.rows({ search: 'applied' }).nodes());
+  const $cks  = $rows.find('input.ck-row');
+  const total = $cks.length;
+  const on    = $cks.filter(':checked').length;
+  // scrollX 모드: 헤더는 복제됨 → 모두 동기화
+  const $hdr = $(`.ck-all[data-tid="${tid}"]`);
+  if (total === 0) { $hdr.prop({ checked: false, indeterminate: false }); return; }
+  if (on === 0)        $hdr.prop({ checked: false, indeterminate: false });
+  else if (on === total) $hdr.prop({ checked: true,  indeterminate: false });
+  else                   $hdr.prop({ checked: false, indeterminate: true  });
+}
+
+// 현재 클릭한 행이 체크되어 있고, 같은 테이블에서 다른 체크된 행이 있으면 일괄 적용 대상 반환
+function getBulkTargets(btn) {
+  const $tr = $(btn).closest('tr');
+  if (!$tr.length || !$tr.find('input.ck-row').is(':checked')) return null;
+  const tid = $tr.data('tid');
+  if (!tid) return null;
+  // 같은 테이블 내 모든 체크된 행 (필터와 무관, 이미 사용자가 체크해둔 것)
+  const $checked = $(`tr[data-tid="${tid}"] input.ck-row:checked`).closest('tr');
+  if ($checked.length <= 1) return null;
+  return $checked;
 }
 
 // ── 단종검토 기능 ──────────────────────────────────────────────────
@@ -1280,18 +1371,23 @@ function showDiscPopover(btn, code, color, name, series, group, type, avg, src) 
   const key = code + '||' + color;
   const existing = loadDiscList().find(x => x.key === key);
   const curLevel = existing && existing.level ? existing.level : '';
+  const $bulk = getBulkTargets(btn);
+  const bulkN = $bulk ? $bulk.length : 0;
 
   const pop = document.createElement('div');
   pop.className = 'disc-level-popover';
   pop.id = 'discLevelPopover';
   let html = '';
+  if (bulkN > 1) {
+    html += `<div class="disc-bulk-banner">선택된 ${bulkN}개 항목에 일괄 적용</div>`;
+  }
   ['1','2','3'].forEach(lv => {
     const def = DISC_LEVELS[lv];
     const cls = lv === curLevel ? ` lv${lv} current` : ` lv${lv}`;
-    html += `<button type="button" class="${cls}" onclick="setDiscLevel('${lv}')"><span class="lv-tag">${def.label}</span>${def.desc}${lv === curLevel ? ' (현재)' : ''}</button>`;
+    html += `<button type="button" class="${cls}" onclick="setDiscLevel('${lv}')"><span class="lv-tag">${def.label}</span>${def.desc}${lv === curLevel && bulkN <= 1 ? ' (현재)' : ''}</button>`;
   });
-  if (existing) {
-    html += `<button type="button" class="cancel" onclick="removeDiscItem()">✕ 단종검토 해제</button>`;
+  if (existing || bulkN > 1) {
+    html += `<button type="button" class="cancel" onclick="removeDiscItem()">✕ 단종검토 해제${bulkN > 1 ? ` (${bulkN}개)` : ''}</button>`;
   }
   pop.innerHTML = html;
   document.body.appendChild(pop);
@@ -1334,18 +1430,35 @@ function hideDiscPopover() {
 function setDiscLevel(level) {
   if (!_activeDiscData) return;
   const d = _activeDiscData;
-  const key = d.code + '||' + d.color;
+  const $bulk = _activeDiscBtn ? getBulkTargets(_activeDiscBtn) : null;
   let list = loadDiscList();
-  const idx = list.findIndex(x => x.key === key);
-  if (idx >= 0) {
-    list[idx].level = level;
+  const now = new Date().toLocaleString('ko-KR');
+  const targets = [];
+  if ($bulk && $bulk.length > 1) {
+    $bulk.each(function() {
+      const tr = this;
+      targets.push({
+        code: tr.dataset.code, color: tr.dataset.color, name: tr.dataset.name,
+        series: tr.dataset.series, group: tr.dataset.group, type: tr.dataset.type,
+        avg: Number(tr.dataset.avg) || 0, src: tr.dataset.src
+      });
+    });
   } else {
-    list.push({ key, code: d.code, color: d.color, name: d.name, series: d.series,
-                group: d.group, type: d.type, avg: d.avg, src: d.src, level,
-                added: new Date().toLocaleString('ko-KR') });
+    targets.push({ code: d.code, color: d.color, name: d.name, series: d.series,
+                    group: d.group, type: d.type, avg: d.avg, src: d.src });
   }
+  targets.forEach(t => {
+    const key = t.code + '||' + t.color;
+    const idx = list.findIndex(x => x.key === key);
+    if (idx >= 0) {
+      list[idx].level = level;
+    } else {
+      list.push({ key, code: t.code, color: t.color, name: t.name, series: t.series,
+                  group: t.group, type: t.type, avg: t.avg, src: t.src, level, added: now });
+    }
+  });
   saveDiscList(list);
-  updateDiscUI(key, true, level);
+  targets.forEach(t => updateDiscUI(t.code + '||' + t.color, true, level));
   renderReviewTab();
   hideDiscPopover();
 }
@@ -1353,11 +1466,17 @@ function setDiscLevel(level) {
 function removeDiscItem() {
   if (!_activeDiscData) return;
   const d = _activeDiscData;
-  const key = d.code + '||' + d.color;
+  const $bulk = _activeDiscBtn ? getBulkTargets(_activeDiscBtn) : null;
   let list = loadDiscList();
-  list = list.filter(x => x.key !== key);
+  const keys = [];
+  if ($bulk && $bulk.length > 1) {
+    $bulk.each(function() { keys.push(this.dataset.code + '||' + this.dataset.color); });
+  } else {
+    keys.push(d.code + '||' + d.color);
+  }
+  list = list.filter(x => !keys.includes(x.key));
   saveDiscList(list);
-  updateDiscUI(key, false);
+  keys.forEach(k => updateDiscUI(k, false));
   renderReviewTab();
   hideDiscPopover();
 }
