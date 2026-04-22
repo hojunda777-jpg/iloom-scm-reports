@@ -661,7 +661,11 @@
   if(sessionStorage.getItem('iloom_auth')==='ok') return;
   var code = prompt('보안코드를 입력하세요:');
   if(code !== '1230'){
-    document.body.innerHTML = '<div style="text-align:center;padding:80px;font-family:sans-serif;color:#999">접근이 거부되었습니다.</div>';
+    try{ window.stop(); }catch(e){}
+    document.documentElement.innerHTML =
+      '<head><meta charset="utf-8"><title>접근 거부</title></head>' +
+      '<body style="margin:0;padding:80px;text-align:center;font-family:sans-serif;color:#999;background:#fff">' +
+      '접근이 거부되었습니다.</body>';
     throw new Error('auth failed');
   }
   sessionStorage.setItem('iloom_auth','ok');
