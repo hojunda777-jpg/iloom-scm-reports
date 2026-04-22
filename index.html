@@ -881,7 +881,8 @@
               <th class="text-center">구성수량</th>
               <th class="text-center">사용구분</th>
               <th class="text-end">가용재고</th>
-              <th class="text-end">월평균출고량</th>
+              <th class="text-end">단품 월평균출고량</th>
+              <th class="text-end">세트 월평균출고량</th>
             </tr></thead>
             <tbody id="setCompBody"></tbody>
           </table>
@@ -935,7 +936,7 @@ function metaCell(v) {
     const key = discKey(r);
     return `<tr data-disc-key="${key}" data-tid="t1" data-code="${escA(r.code)}" data-color="${escA(r.color)}" data-name="${escA(r.name)}" data-series="${escA(r.series)}" data-group="${escA(r.group)}" data-type="${r.type}" data-avg="${r.avg}" data-src="기준1">
     <td>${typeBadge(r.type)}</td>
-    <td>${r.type==='SET' ? `<code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}')">${r.code}</code>` : `<code>${r.code}</code>`}</td>
+    <td>${r.type==='SET' ? `<code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}',${r.avg})">${r.code}</code>` : `<code>${r.code}</code>`}</td>
     <td>${r.color}</td>
     <td>${r.name}</td>
     <td>${r.series}</td>
@@ -956,7 +957,7 @@ function metaCell(v) {
   tbody.innerHTML = DATA.c2.map(r => {
     const key = discKey(r);
     return `<tr data-disc-key="${key}" data-tid="t2" data-code="${escA(r.code)}" data-color="${escA(r.color)}" data-name="${escA(r.name)}" data-series="${escA(r.series)}" data-group="${escA(r.group)}" data-type="SET" data-avg="${r.avg}" data-src="기준2">
-    <td><code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}')">${r.code}</code></td>
+    <td><code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}',${r.avg})">${r.code}</code></td>
     <td>${r.color}</td>
     <td>${r.name}</td>
     <td>${r.series}</td>
@@ -979,14 +980,14 @@ function metaCell(v) {
   tbody.innerHTML = DATA.c3.map(r => {
     const key = discKey(r);
     return `<tr data-disc-key="${key}" data-tid="t3" data-code="${escA(r.code)}" data-color="${escA(r.color)}" data-name="${escA(r.name)}" data-series="${escA(r.series)}" data-group="${escA(r.group)}" data-type="SET" data-avg="${r.avg}" data-src="기준3">
-    <td><code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}')">${r.code}</code></td>
+    <td><code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}',${r.avg})">${r.code}</code></td>
     <td>${r.color}</td>
     <td>${r.name}</td>
     <td>${r.series}</td>
     <td>${r.group}</td>
     <td class="text-end">${avgCell(r.avg)}</td>
     <td>${metaCell(r.best_label)}</td>
-    <td><code class="set-code-link" onclick="showSetModal('${r.best_code}','${r.best_color}')">${r.best_code}</code></td>
+    <td><code class="set-code-link" onclick="showSetModal('${r.best_code}','${r.best_color}',${r.best_avg})">${r.best_code}</code></td>
     <td>${r.best_color}</td>
     <td style="font-size:11px">${r.best_name}</td>
     <td class="text-end" style="font-family:Montserrat,sans-serif">${r.best_avg}</td>
@@ -1005,14 +1006,14 @@ function metaCell(v) {
   tbody.innerHTML = DATA.c4.map(r => {
     const key = discKey(r);
     return `<tr data-disc-key="${key}" data-tid="t4" data-code="${escA(r.code)}" data-color="${escA(r.color)}" data-name="${escA(r.name)}" data-series="${escA(r.series)}" data-group="${escA(r.group)}" data-type="SET" data-avg="${r.avg}" data-src="기준4">
-    <td><code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}')">${r.code}</code></td>
+    <td><code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}',${r.avg})">${r.code}</code></td>
     <td>${r.color}</td>
     <td>${r.name}</td>
     <td>${r.series}</td>
     <td>${r.group}</td>
     <td class="text-end">${avgCell(r.avg)}</td>
     <td>${metaCell(r.best_label)}</td>
-    <td><code class="set-code-link" onclick="showSetModal('${r.best_code}','${r.best_color}')">${r.best_code}</code></td>
+    <td><code class="set-code-link" onclick="showSetModal('${r.best_code}','${r.best_color}',${r.best_avg})">${r.best_code}</code></td>
     <td>${r.best_color}</td>
     <td style="font-size:11px">${r.best_name}</td>
     <td class="text-end" style="font-family:Montserrat,sans-serif">${r.best_avg}</td>
@@ -1032,7 +1033,7 @@ function metaCell(v) {
     const key = discKey(r);
     return `<tr data-disc-key="${key}" data-tid="t5" data-code="${escA(r.code)}" data-color="${escA(r.color)}" data-name="${escA(r.name)}" data-series="${escA(r.series)}" data-group="${escA(r.group)}" data-type="${r.type}" data-avg="${r.avg}" data-src="하위50%">
     <td>${typeBadge(r.type)}</td>
-    <td>${r.type==='SET' ? `<code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}')">${r.code}</code>` : `<code>${r.code}</code>`}</td>
+    <td>${r.type==='SET' ? `<code class="set-code-link" onclick="showSetModal('${r.code}','${r.color}',${r.avg})">${r.code}</code>` : `<code>${r.code}</code>`}</td>
     <td>${r.color}</td>
     <td>${r.name}</td>
     <td>${r.series}</td>
@@ -1325,7 +1326,7 @@ function downloadExcel(tableId, sheetName) {
 }
 
 // 세트코드 클릭 → 구성단품 모달
-function showSetModal(code, color) {
+function showSetModal(code, color, setAvg) {
   const key = code + '||' + (color || '');
   const items = SET_COMPS[key] || [];
   document.getElementById('setCompModalTitle').textContent =
@@ -1333,6 +1334,9 @@ function showSetModal(code, color) {
   const tbody = document.getElementById('setCompBody');
   const tbl   = document.querySelector('#setCompTableWrap table');
   const empty = document.getElementById('setCompEmpty');
+  const setAvgCell = (setAvg != null && setAvg !== '' && !Number.isNaN(Number(setAvg)))
+    ? `<span style="color:#555">${setAvg}</span>`
+    : '<span style="color:#ccc">-</span>';
   if (items.length === 0) {
     tbody.innerHTML = '';
     tbl.style.display = 'none';
@@ -1351,6 +1355,7 @@ function showSetModal(code, color) {
         <td class="text-center"><small style="color:#999">${it.usage}</small></td>
         <td class="text-end"><span class="${cls}">${it.avail.toLocaleString()}</span></td>
         <td class="text-end" style="font-family:Montserrat,sans-serif">${avgVal != null ? avgVal : '<span style="color:#ccc">-</span>'}</td>
+        <td class="text-end" style="font-family:Montserrat,sans-serif;background:#fafafa">${setAvgCell}</td>
       </tr>`;
     }).join('');
   }
