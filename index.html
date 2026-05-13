@@ -713,13 +713,13 @@
   }
 
   function renderLoginUI(){
+    // 주의: innerHTML 로 그려진 <script> 태그는 브라우저가 실행하지 않음 → GIS 스크립트는 아래에서 createElement 로 동적 주입
     document.documentElement.innerHTML =
       '<head><meta charset="utf-8"><title>로그인 - 일룸 SCM 단종후보 리포트</title>' +
       '<meta name="viewport" content="width=device-width, initial-scale=1">' +
       '<link rel="preconnect" href="https://fonts.googleapis.com">' +
       '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
       '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">' +
-      '<script src="https://accounts.google.com/gsi/client" async defer><\/script>' +
       '<style>' +
       'html,body{margin:0;padding:0;height:100%;visibility:visible!important;}' +
       'body{font-family:"Noto Sans KR",sans-serif;background:#F8F8F8;color:#333;display:flex;align-items:center;justify-content:center;min-height:100vh;}' +
@@ -749,7 +749,7 @@
       try {
         var claims = decodeJwt(resp.credential);
         var email = (claims.email || '').toLowerCase();
-        if (!email || email.indexOf('@' + ALLOWED_DOMAIN) <= 0 || !email.endsWith('@' + ALLOWED_DOMAIN)) {
+        if (!email || !email.endsWith('@' + ALLOWED_DOMAIN)) {
           showError('@' + ALLOWED_DOMAIN + ' 계정만 접근 가능합니다.');
           return;
         }
@@ -769,25 +769,35 @@
       }
     };
 
-    function initGIS(retry){
-      if (!window.google || !google.accounts || !google.accounts.id) {
-        if (retry > 50) { showError('Google 로그인 모듈 로드 실패. 새로고침해주세요.'); return; }
-        return setTimeout(function(){ initGIS((retry||0)+1); }, 100);
+    function initGIS(){
+      try {
+        google.accounts.id.initialize({
+          client_id: CLIENT_ID,
+          callback: window.__iloomHandleCredential,
+          hd: ALLOWED_DOMAIN,
+          auto_select: false,
+          ux_mode: 'popup'
+        });
+        google.accounts.id.renderButton(
+          document.getElementById('g_id_signin'),
+          { type: 'standard', theme: 'outline', size: 'large',
+            text: 'signin_with', shape: 'rectangular', logo_alignment: 'left', width: 280 }
+        );
+      } catch(e) {
+        showError('Google 로그인 초기화 실패: ' + e.message);
       }
-      google.accounts.id.initialize({
-        client_id: CLIENT_ID,
-        callback: window.__iloomHandleCredential,
-        hd: ALLOWED_DOMAIN,
-        auto_select: false,
-        ux_mode: 'popup'
-      });
-      google.accounts.id.renderButton(
-        document.getElementById('g_id_signin'),
-        { type: 'standard', theme: 'outline', size: 'large',
-          text: 'signin_with', shape: 'rectangular', logo_alignment: 'left', width: 280 }
-      );
     }
-    initGIS(0);
+
+    // GIS 스크립트 동적 로드 (innerHTML 안의 <script>는 실행 안 되므로)
+    var gisScript = document.createElement('script');
+    gisScript.src = 'https://accounts.google.com/gsi/client';
+    gisScript.async = true;
+    gisScript.defer = true;
+    gisScript.onload = initGIS;
+    gisScript.onerror = function(){
+      showError('Google 로그인 모듈 로드 실패. 회사 네트워크에서 accounts.google.com 차단 여부를 확인해주세요.');
+    };
+    document.head.appendChild(gisScript);
   }
 
   if (document.readyState === 'loading') {
