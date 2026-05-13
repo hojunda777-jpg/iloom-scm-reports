@@ -2627,9 +2627,14 @@ function attachIloomButtons(rootEl) {
   // ─────────────────────────────────────────────────────────────
   // PUSH: 본인 체크 → 시트로 전송 (postSync) + saveDiscList wrap
   // ─────────────────────────────────────────────────────────────
+  var lastPushTimes = {};       // {key: ms} — 본인이 push 한 시각 (race protection)
+  var PUSH_GRACE_MS = 15000;    // push 후 N초간 pull 결과가 본인 키를 덮어쓰지 않음
+
   function postSync(payload) {
     var u = getUser();
     if (!u) return;
+    var key = String(payload.code || '') + '||' + String(payload.color || '');
+    lastPushTimes[key] = Date.now();
     var body = JSON.stringify({
       email:  u.email,
       name:   u.name || '',
@@ -2702,13 +2707,15 @@ function attachIloomButtons(rootEl) {
     if (!Array.isArray(rows)) return;
 
     // 단품 키별로 시트의 가장 최신 행 1개만 추림
+    // ts 파싱 실패 시 row index (시트 append 순서) 로 fallback → "최신" 정렬 안정화
     var byKey = {};
-    rows.forEach(function(r){
+    rows.forEach(function(r, idx){
       var code  = String(r['단품코드'] || '').trim();
       var color = String(r['색상']     || '').trim();
       if (!code) return;
       var key = code + '||' + color;
-      var ts  = new Date(r['타임스탬프']).getTime() || 0;
+      var ts  = new Date(r['타임스탬프']).getTime();
+      if (!ts || isNaN(ts)) ts = idx + 1;  // fallback: append 순서
       if (!byKey[key] || byKey[key].ts < ts) byKey[key] = { row: r, ts: ts };
     });
 
@@ -2719,17 +2726,49 @@ function attachIloomButtons(rootEl) {
     var localByKey = {};
     localList.forEach(function(it){ if (it && it.key) localByKey[it.key] = it; });
 
+    // 진단 로그: 본인 행이 몇 건이며 가장 최신이 어떤 status 인지
+    if (myEmail) {
+      var myKeys = Object.keys(byKey).filter(function(k){
+        return String(byKey[k].row['이메일']||'').toLowerCase() === myEmail;
+      });
+      console.log('[disc-pull] rows=' + rows.length + ' / unique keys=' + Object.keys(byKey).length +
+                  ' / my latest entries=' + myKeys.length);
+      if (myKeys.length) {
+        var sample = byKey[myKeys[0]].row;
+        console.log('[disc-pull] my sample row:', { key: myKeys[0], status: sample['검토상태'], 차수: sample['검토차수'], ts: sample['타임스탬프'] });
+      }
+    }
+
     var merged = [];
     var processed = {};
+    var nowMs = Date.now();
 
     Object.keys(byKey).forEach(function(key){
+      // race protection: 본인이 방금 push 한 키는 pull 결과로 덮어쓰지 않음
+      var lastPush = lastPushTimes[key];
+      if (lastPush && (nowMs - lastPush) < PUSH_GRACE_MS) {
+        processed[key] = true;
+        var locP = localByKey[key];
+        if (locP) {
+          locP.isOwn = true;
+          delete locP.reviewerName;
+          delete locP.reviewerEmail;
+          merged.push(locP);
+        }
+        return;
+      }
+
       var row = byKey[key].row;
       var status = String(row['검토상태'] || '').trim();
       processed[key] = true;
       if (!status) return;  // 해제 상태 → list 에서 제외
 
-      var m = status.match(/^(\d)/);
-      if (!m) return;
+      // status 매칭 관대화: '1차 - ...', 'lv1', '1' 모두 인식
+      var m = status.match(/(?:lv)?(\d)/i);
+      if (!m) {
+        console.warn('[disc-pull] status pattern unmatched:', status, 'key=', key);
+        return;
+      }
       var level = m[1];
 
       var sheetEmail = String(row['이메일'] || '').toLowerCase();
