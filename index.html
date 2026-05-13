@@ -2601,5 +2601,101 @@ function attachIloomButtons(rootEl) {
   });
 })();
 </script>
+
+<script>
+(function(){
+  var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyTS5WFPYaG_zFiAzA_JkfPkX1FxKNmcalFPqzIFXDrwdbyhMrVQcYzG64dpRbKT8EW/exec';
+
+  function getUser() {
+    try {
+      var u = JSON.parse(sessionStorage.getItem('iloom_user') || 'null');
+      return (u && u.email) ? u : null;
+    } catch(e) { return null; }
+  }
+
+  function postSync(payload) {
+    var u = getUser();
+    if (!u) return;
+    var body = JSON.stringify({
+      email:  u.email,
+      name:   u.name || '',
+      code:   payload.code   || '',
+      color:  payload.color  || '',
+      level:  payload.level  || '',
+      status: payload.status || '',
+      memo:   payload.memo   || ''
+    });
+    // 주의: Content-Type 명시 안 함 → 자동으로 text/plain 으로 보내져 CORS preflight 회피
+    fetch(WEB_APP_URL, { method: 'POST', body: body, mode: 'cors', redirect: 'follow' })
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if (!j.ok) console.warn('[disc-sync] fail:', j.error); })
+      .catch(function(e){ console.warn('[disc-sync] error:', e); });
+  }
+
+  function patch() {
+    if (window.__iloomDiscSyncPatched) return true;
+    if (typeof window.saveDiscList !== 'function' || typeof window.loadDiscList !== 'function') return false;
+    window.__iloomDiscSyncPatched = true;
+
+    var prevList = JSON.parse(JSON.stringify(window.loadDiscList()));
+    var orig = window.saveDiscList;
+    window.saveDiscList = function(list) {
+      var ret = orig.apply(this, arguments);
+      try {
+        var prevByKey = {}, newByKey = {};
+        prevList.forEach(function(it){ if (it && it.key) prevByKey[it.key] = it; });
+        list.forEach(function(it){ if (it && it.key) newByKey[it.key] = it; });
+
+        // 추가 또는 차수 변경
+        list.forEach(function(it){
+          if (!it || !it.key) return;
+          var prev = prevByKey[it.key];
+          if (!prev || prev.level !== it.level) {
+            postSync({
+              code:   it.code,
+              color:  it.color,
+              level:  it.src || '',
+              status: 'lv' + (it.level || ''),
+              memo:   it.name || ''
+            });
+          }
+        });
+        // 해제된 항목
+        prevList.forEach(function(it){
+          if (!it || !it.key) return;
+          if (!newByKey[it.key]) {
+            postSync({
+              code:   it.code,
+              color:  it.color,
+              level:  it.src || '',
+              status: '',
+              memo:   '해제: ' + (it.name || '')
+            });
+          }
+        });
+        prevList = JSON.parse(JSON.stringify(list));
+      } catch(e) {
+        console.warn('[disc-sync] diff error:', e);
+      }
+      return ret;
+    };
+    console.log('[disc-sync] saveDiscList patched →', WEB_APP_URL);
+    return true;
+  }
+
+  function tryPatch(retry) {
+    if (patch()) return;
+    if ((retry||0) > 100) { console.warn('[disc-sync] saveDiscList not found after 10s'); return; }
+    setTimeout(function(){ tryPatch((retry||0)+1); }, 100);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ tryPatch(0); });
+  } else {
+    tryPatch(0);
+  }
+})();
+</script>
+
 </body>
 </html>
