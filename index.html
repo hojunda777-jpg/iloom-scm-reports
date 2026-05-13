@@ -684,17 +684,117 @@
 <body>
 <script>
 (function(){
-  if(sessionStorage.getItem('iloom_auth')==='ok') return;
-  var code = prompt('보안코드를 입력하세요:');
-  if(code !== '1230'){
-    try{ window.stop(); }catch(e){}
-    document.documentElement.innerHTML =
-      '<head><meta charset="utf-8"><title>접근 거부</title></head>' +
-      '<body style="margin:0;padding:80px;text-align:center;font-family:sans-serif;color:#999;background:#fff">' +
-      '접근이 거부되었습니다.</body>';
-    throw new Error('auth failed');
+  var ALLOWED_DOMAIN = 'fursys.com';
+  var CLIENT_ID      = '43445771803-8ns1levesgvalhapd4ng1hl4oap5r99n.apps.googleusercontent.com';
+
+  // 이미 인증된 세션이면 통과
+  try {
+    var cached = sessionStorage.getItem('iloom_user');
+    if (cached) {
+      var u = JSON.parse(cached);
+      if (u && u.email && u.email.toLowerCase().indexOf('@' + ALLOWED_DOMAIN) > 0) return;
+    }
+  } catch(e) {}
+
+  // 본문 즉시 숨김 (인증 전 콘텐츠 노출 방지)
+  var hideStyle = document.createElement('style');
+  hideStyle.id = 'iloom-auth-hide';
+  hideStyle.textContent = 'html,body{visibility:hidden!important;}';
+  (document.head || document.documentElement).appendChild(hideStyle);
+
+  function decodeJwt(token){
+    var payload = token.split('.')[1];
+    var b64 = payload.replace(/-/g,'+').replace(/_/g,'/');
+    while (b64.length % 4) b64 += '=';
+    var json = decodeURIComponent(Array.prototype.map.call(atob(b64), function(c){
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(json);
   }
-  sessionStorage.setItem('iloom_auth','ok');
+
+  function renderLoginUI(){
+    document.documentElement.innerHTML =
+      '<head><meta charset="utf-8"><title>로그인 - 일룸 SCM 단종후보 리포트</title>' +
+      '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+      '<link rel="preconnect" href="https://fonts.googleapis.com">' +
+      '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+      '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">' +
+      '<script src="https://accounts.google.com/gsi/client" async defer><\/script>' +
+      '<style>' +
+      'html,body{margin:0;padding:0;height:100%;visibility:visible!important;}' +
+      'body{font-family:"Noto Sans KR",sans-serif;background:#F8F8F8;color:#333;display:flex;align-items:center;justify-content:center;min-height:100vh;}' +
+      '.card{background:#fff;padding:48px 56px;border-radius:10px;text-align:center;box-shadow:0 2px 16px rgba(0,0,0,0.06);max-width:420px;width:90%;}' +
+      '.brand{font-size:13px;color:#c80a1e;font-weight:700;letter-spacing:1px;margin-bottom:8px;}' +
+      '.title{font-size:20px;font-weight:700;margin-bottom:6px;color:#222;}' +
+      '.desc{font-size:13px;color:#666;line-height:1.6;margin-bottom:28px;}' +
+      '.signin-wrap{display:flex;justify-content:center;min-height:44px;}' +
+      '.err{color:#c80a1e;font-size:13px;margin-top:18px;min-height:18px;}' +
+      '.foot{font-size:11px;color:#aaa;margin-top:24px;}' +
+      '</style></head>' +
+      '<body><div class="card">' +
+      '<div class="brand">ILOOM SCM</div>' +
+      '<div class="title">단종후보 리포트</div>' +
+      '<div class="desc">@' + ALLOWED_DOMAIN + ' 구글 계정으로<br>로그인해주세요.</div>' +
+      '<div class="signin-wrap"><div id="g_id_signin"></div></div>' +
+      '<div class="err" id="auth-error"></div>' +
+      '<div class="foot">접근 권한 문의: SCM팀</div>' +
+      '</div></body>';
+
+    function showError(msg){
+      var el = document.getElementById('auth-error');
+      if (el) el.textContent = msg;
+    }
+
+    window.__iloomHandleCredential = function(resp){
+      try {
+        var claims = decodeJwt(resp.credential);
+        var email = (claims.email || '').toLowerCase();
+        if (!email || email.indexOf('@' + ALLOWED_DOMAIN) <= 0 || !email.endsWith('@' + ALLOWED_DOMAIN)) {
+          showError('@' + ALLOWED_DOMAIN + ' 계정만 접근 가능합니다.');
+          return;
+        }
+        if (claims.email_verified === false) {
+          showError('이메일 인증이 완료되지 않은 계정입니다.');
+          return;
+        }
+        sessionStorage.setItem('iloom_user', JSON.stringify({
+          email: email,
+          name: claims.name || '',
+          picture: claims.picture || '',
+          loginAt: new Date().toISOString()
+        }));
+        location.reload();
+      } catch(e) {
+        showError('로그인 처리 실패: ' + e.message);
+      }
+    };
+
+    function initGIS(retry){
+      if (!window.google || !google.accounts || !google.accounts.id) {
+        if (retry > 50) { showError('Google 로그인 모듈 로드 실패. 새로고침해주세요.'); return; }
+        return setTimeout(function(){ initGIS((retry||0)+1); }, 100);
+      }
+      google.accounts.id.initialize({
+        client_id: CLIENT_ID,
+        callback: window.__iloomHandleCredential,
+        hd: ALLOWED_DOMAIN,
+        auto_select: false,
+        ux_mode: 'popup'
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('g_id_signin'),
+        { type: 'standard', theme: 'outline', size: 'large',
+          text: 'signin_with', shape: 'rectangular', logo_alignment: 'left', width: 280 }
+      );
+    }
+    initGIS(0);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderLoginUI);
+  } else {
+    renderLoginUI();
+  }
 })();
 </script>
 
